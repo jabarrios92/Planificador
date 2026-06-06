@@ -1176,12 +1176,15 @@ export default function App() {
             
             {/* Logo and App Title */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 shrink-0">
                 <Stethoscope className="w-5 h-5" />
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
-                Planificador <span className="text-indigo-400">Clínico</span>
-              </span>
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-white tracking-tight leading-none mb-1">
+                  Planificador <span className="text-indigo-400">Clínico</span>
+                </span>
+                <span className="text-[11px] text-slate-400 font-medium tracking-wide leading-none pt-0.5">by Dr. Jorge Barrios</span>
+              </div>
             </div>
 
             {/* In-tab switch indicators */}
@@ -1981,6 +1984,28 @@ export default function App() {
             </div>
           </div>
         </main>
+
+        {/* Global Footer */}
+        {!isSessionMode && (
+          <footer className="w-full border-t border-slate-800 bg-slate-900/50 backdrop-blur-md mt-auto py-8">
+            <div className="max-w-7xl mx-auto px-6 flex flex-col items-center justify-center space-y-4">
+              <div className="w-10 h-10 bg-indigo-600/10 rounded-full flex items-center justify-center text-indigo-400">
+                <Stethoscope className="w-5 h-5" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="text-sm font-bold text-slate-300">Dr. Jorge Andrés Barrios Durán™</p>
+                <p className="text-xs text-slate-500">&copy; {new Date().getFullYear()} Todos los derechos reservados.</p>
+              </div>
+              <div className="flex items-center gap-4 text-[10px] uppercase font-bold tracking-widest text-slate-600 pt-4 cursor-pointer">
+                 <span className="hover:text-indigo-400 transition-colors">Términos y Condiciones</span>
+                 <span>&bull;</span>
+                 <span className="hover:text-indigo-400 transition-colors">Política de Privacidad</span>
+                 <span>&bull;</span>
+                 <span className="hover:text-indigo-400 transition-colors">Soporte</span>
+              </div>
+            </div>
+          </footer>
+        )}
 
         {/* iOS Cupertino Style Multi-step Confirm Dialog Overlay */}
         {confirmModal.isOpen && (
