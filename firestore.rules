@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default catch-all denies all access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reuseable primitives
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-+%]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // 1. User Profile Collection
+    match /users/{userId}/profile/info {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && incoming().uid == request.auth.uid
+        && incoming().email is string
+        && incoming().email.size() <= 256;
+      allow update: if isOwner(userId)
+        && incoming().uid == request.auth.uid
+        && incoming().email == existing().email
+        && incoming().diff(existing()).affectedKeys().hasAny(['displayName', 'createdAt']);
+    }
+
+    // 2. StudyProgress Collection
+    match /users/{userId}/progress/{topicId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isValidId(topicId)
+        && incoming().userId == userId
+        && incoming().topicId == topicId
+        && incoming().status in ['Sin Empezar', 'Estudiado', 'En Repaso', 'Dominado']
+        && (incoming().rating == null || incoming().rating in ['Fácil', 'Regular', 'Difícil'])
+        && (incoming().reviewInterval == null || incoming().reviewInterval is number)
+        && (incoming().repetitionsCount == null || incoming().repetitionsCount is number)
+        && (incoming().nextReviewDate == null || incoming().nextReviewDate is string)
+        && (incoming().notes == null || incoming().notes is string && incoming().notes.size() <= 4096);
+
+      allow update: if isOwner(userId)
+        && incoming().userId == userId
+        && incoming().topicId == topicId
+        && incoming().status in ['Sin Empezar', 'Estudiado', 'En Repaso', 'Dominado'];
+
+      allow delete: if isOwner(userId);
+    }
+
+    // 3. ReviewEvent Collection
+    match /users/{userId}/reviews/{reviewId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && isValidId(reviewId)
+        && incoming().userId == userId
+        && incoming().topicId is string
+        && incoming().date is string
+        && incoming().completed is bool;
+
+      allow update: if isOwner(userId)
+        && incoming().userId == userId
+        && incoming().topicId == existing().topicId;
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}

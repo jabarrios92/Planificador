@@ -1,0 +1,63 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile with configuration, stats, and settings.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique user ID." },
+        "email": { "type": "string", "description": "User email." },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the user signed up." },
+        "displayName": { "type": "string", "description": "The human displayed name." }
+      },
+      "required": ["uid", "email"]
+    },
+    "StudyProgress": {
+      "title": "StudyProgress",
+      "description": "The student's progress on a specific topic.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The user ID of the student." },
+        "topicId": { "type": "string", "description": "The unique ID of the topic." },
+        "status": { "type": "string", "enum": ["Sin Empezar", "Estudiado", "En Repaso", "Dominado"], "description": "The current status of the study topic." },
+        "rating": { "type": "string", "enum": ["Fácil", "Regular", "Difícil"], "description": "The rating of the last repetition." },
+        "reviewInterval": { "type": "number", "description": "Interval in days for SRS." },
+        "repetitionsCount": { "type": "number", "description": "Number of times reviewed." },
+        "nextReviewDate": { "type": "string", "format": "date-time", "description": "The scheduled date for the next review." },
+        "lastReviewedAt": { "type": "string", "format": "date-time", "description": "The date of the last review." },
+        "notes": { "type": "string", "description": "Personal notes for this topic." }
+      },
+      "required": ["userId", "topicId", "status"]
+    },
+    "ReviewEvent": {
+      "title": "ReviewEvent",
+      "description": "A scheduled or completed review session.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The unique event ID." },
+        "userId": { "type": "string", "description": "The user ID." },
+        "topicId": { "type": "string", "description": "The topic ID." },
+        "topicTitle": { "type": "string", "description": "The topic title." },
+        "specialty": { "type": "string", "description": "The specialty name." },
+        "date": { "type": "string", "format": "date", "description": "The scheduled date." },
+        "completed": { "type": "boolean", "description": "Whether the review was completed." },
+        "completedAt": { "type": "string", "format": "date-time", "description": "When it was completed." }
+      },
+      "required": ["id", "userId", "topicId", "date", "completed"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/profile/info": {
+      "schema": "UserProfile",
+      "description": "User profile collection."
+    },
+    "/users/{userId}/progress/{topicId}": {
+      "schema": "StudyProgress",
+      "description": "Direct association of study topics progress."
+    },
+    "/users/{userId}/reviews/{reviewId}": {
+      "schema": "ReviewEvent",
+      "description": "Reviews scheduler data."
+    }
+  }
+}

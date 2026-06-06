@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+.light {
+  /* Backgrounds */
+  --color-slate-950: #f1f5f9; /* Slate 100 */
+  --color-slate-900: #ffffff; /* White card bg */
+  --color-slate-800: #e2e8f0; /* Slate 200 - Borders */
+  --color-slate-700: #cbd5e1; /* Slate 300 - Hover states */
+  --color-slate-600: #94a3b8; /* Slate 400 */
+  
+  /* Text & Icons */
+  --color-slate-500: #64748b; /* Slate 500 - Muted text */
+  --color-slate-400: #475569; /* Slate 600 - Normal secondary text */
+  --color-slate-300: #334155; /* Slate 700 - Normal text */
+  --color-slate-200: #1e293b; /* Slate 800 - Headings */
+  --color-slate-100: #0f172a; /* Slate 900 */
+  --color-slate-50:  #020617; /* Slate 950 */
+  
+  /* Pure White elements become Dark */
+  --color-white: #0f172a; 
+  
+  /* Accents - darken them for visibility on light bg */
+  --color-indigo-400: #4f46e5; /* indigo-600 */
+  --color-indigo-500: #4338ca; /* indigo-700 */
+  
+  --color-emerald-400: #059669; /* emerald-600 */
+  --color-emerald-500: #047857; /* emerald-700 */
+  
+  --color-amber-300: #d97706; /* amber-600 */
+  --color-amber-400: #ea580c; /* orange-600 */
+  --color-amber-500: #c2410c; /* orange-700 */
+  
+  --color-rose-400: #e11d48; /* rose-600 */
+  --color-rose-500: #be123c; /* rose-700 */
+  --color-rose-600: #fb7185; /* inverted inside button */
+  
+  --color-sky-400: #0284c7;  /* sky-600 */
+  --color-sky-500: #0369a1;  /* sky-700 */
+  
+  --color-orange-400: #ea580c; /* orange-600 */
+  --color-orange-500: #c2410c; /* orange-700 */
+}
+

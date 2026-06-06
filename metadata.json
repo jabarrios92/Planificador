@@ -1,0 +1,10 @@
+{
+  "name": "Mentor y Planificador de Residencia Médica",
+  "description": "Plataforma con más de 60 temas para preparar el examen de residencia, con calendario, repasos optimizados de repetición espaciada, estadísticas de desempeño y sincronización en la nube.",
+  "requestFramePermissions": [
+    "notifications"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
