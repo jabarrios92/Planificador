@@ -94,20 +94,20 @@ export default function Home({
           >
             
             {/* Left Column (Main Copy) */}
-            <motion.div variants={fadeUp} className="lg:col-span-7 flex flex-col justify-center border-r border-[#ffffff0a] pr-12 lg:pr-24 lg:-ml-6">
+            <motion.div variants={fadeUp} className="lg:col-span-7 flex flex-col items-center text-center justify-center lg:border-r border-[#ffffff0a] px-0 lg:pr-12 xl:pr-24 lg:-ml-6">
               
               <h1 className="text-5xl md:text-6xl lg:text-[5.5rem] font-serif text-[#e2dbea] uppercase tracking-wide leading-[1.1] mb-10 drop-shadow-lg">
                 Prepárate para<br />
                 <span className="italic font-light text-[#a5a1f6] tracking-tight transform -skew-x-6 inline-block">destacar</span>
               </h1>
               
-              <motion.div variants={fadeUp} className="relative">
+              <motion.div variants={fadeUp} className="relative flex justify-center w-full">
                 <p className="relative z-10 text-[#a79cb8] font-medium leading-relaxed max-w-md text-sm sm:text-[15px] mb-14 drop-shadow-md">
                   Imagina el día de tu examen. Te sientas frente a la pantalla y reconoces cada patrón clínico al instante. El conocimiento fluye con absoluta certeza gracias a un estudio enfocado, basado en evidencia y repetición espaciada inteligente.
                 </p>
               </motion.div>
 
-              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center gap-6">
                 <button 
                   onClick={() => onNavigate('syllabus')}
                   className="inline-flex items-center justify-center gap-3 px-8 py-3.5 rounded-full border border-slate-700 hover:border-white font-mono uppercase tracking-[0.2em] text-[10px] transition-all group overflow-hidden relative"
@@ -120,29 +120,29 @@ export default function Home({
             </motion.div>
 
             {/* Right Column (Info / Stats) */}
-            <motion.div variants={fadeUp} className="lg:col-span-5 flex flex-col justify-between pl-0 lg:pl-12 relative h-full min-h-[300px]">
-              <motion.div variants={fadeUp} className="absolute right-0 top-0 text-[10px] font-mono text-[#766a87] tracking-[0.2em]">
+            <motion.div variants={fadeUp} className="lg:col-span-5 flex flex-col items-center text-center justify-between pl-0 lg:pl-12 relative h-full min-h-[300px] mt-12 lg:mt-0">
+              <motion.div variants={fadeUp} className="lg:absolute right-0 top-0 text-[10px] font-mono text-[#766a87] tracking-[0.2em] mb-8 lg:mb-0">
                 → {new Date().toISOString().slice(0, 10).replace(/-/g, '.')}
               </motion.div>
               
-              <div className="space-y-16 mt-8 flex-1 flex flex-col justify-center">
-                <motion.div variants={fadeUp} className="group cursor-pointer" onClick={() => onNavigate('syllabus')}>
+              <div className="space-y-16 mt-0 lg:mt-8 flex-1 flex flex-col justify-center w-full items-center">
+                <motion.div variants={fadeUp} className="group cursor-pointer flex flex-col items-center" onClick={() => onNavigate('syllabus')}>
                   <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#766a87] mb-4 flex items-center gap-2">
-                    <span className="w-4 h-[1px] bg-[#766a87]"></span> PRÓXIMO TEMA
+                    <span className="w-4 h-[1px] bg-[#766a87]"></span> PRÓXIMO TEMA <span className="w-4 h-[1px] bg-[#766a87]"></span>
                   </h3>
                   <p className="text-2xl font-serif text-[#e2dbea] max-w-[280px] leading-tight group-hover:text-white transition-colors">
                     {nextTargetTopic?.title || 'Todos los temas estudiados'}
                   </p>
-                  <div className="mt-4 text-[10px] text-[#9d8afe] group-hover:text-[#e2dbea] transition-colors flex items-center gap-2 font-mono tracking-widest uppercase">
+                  <div className="mt-4 text-[10px] text-[#9d8afe] group-hover:text-[#e2dbea] transition-colors flex items-center gap-2 font-mono tracking-widest uppercase justify-center">
                     Ir al temario <Sparkles className="w-3 h-3 group-hover:animate-pulse" />
                   </div>
                 </motion.div>
 
-                <motion.div variants={fadeUp}>
+                <motion.div variants={fadeUp} className="flex flex-col items-center">
                   <h3 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#766a87] mb-3 flex items-center gap-2">
-                    <span className="w-4 h-[1px] bg-[#766a87]"></span> DESEMPEÑO
+                    <span className="w-4 h-[1px] bg-[#766a87]"></span> DESEMPEÑO <span className="w-4 h-[1px] bg-[#766a87]"></span>
                   </h3>
-                  <div className="flex items-baseline gap-3">
+                  <div className="flex items-baseline gap-3 justify-center">
                     <span className="text-5xl font-serif text-white tracking-widest drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                       {Object.keys(topicsProgress).length}
                     </span>
@@ -150,13 +150,13 @@ export default function Home({
                       / {topics.length}
                     </span>
                   </div>
-                  <p className="text-[9px] text-[#766a87] uppercase font-mono tracking-[0.15em] mt-2">
+                  <p className="text-[9px] text-[#766a87] uppercase font-mono tracking-[0.15em] mt-2 text-center">
                     Temas Estudiados en total
                   </p>
                 </motion.div>
               </div>
               
-              <motion.div variants={fadeUp} className="absolute bottom-0 right-0 text-[9px] font-mono text-[#766a87]/60 tracking-[0.25em]">
+              <motion.div variants={fadeUp} className="lg:absolute bottom-0 right-0 text-[9px] font-mono text-[#766a87]/60 tracking-[0.25em] mt-12 lg:mt-0">
                 → [SYS.OK]
               </motion.div>
             </motion.div>
