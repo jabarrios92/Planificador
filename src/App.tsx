@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  BookOpen, Calendar, BarChart3, User, Moon, Sun, Scissors, Activity, 
+  BookOpen, Calendar, BarChart3, User, Scissors, Activity, 
   Sparkles, HeartHandshake, Stethoscope, Brain, Eye, Bone, Baby, Smile, 
   ChevronRight, CheckCircle2, AlertCircle, Clock, BookMarked, Save, 
   Sparkle, LogIn, LogOut, Check, ArrowRight, RefreshCw, Send, ChevronLeft, 
@@ -263,9 +263,6 @@ export default function App() {
       return prev;
     });
   };
-
-  // Theme state
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
   // Load user auth state
   useEffect(() => {
@@ -1191,7 +1188,7 @@ export default function App() {
   }).length;
 
   return (
-    <div className={theme}>
+    <div className={'dark'}>
       <div className="noise-bg mix-blend-overlay"></div>
       <div className="min-h-screen bg-slate-950 font-sans text-slate-300 transition-colors duration-300 flex flex-col relative z-0">
         
@@ -1292,15 +1289,6 @@ export default function App() {
             {/* Quick action tools */}
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
-                {/* Theme toggle */}
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  title={`Cambiar a modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
-                  className="w-8 h-8 rounded-full border border-slate-800 text-[#e2dbea] bg-transparent hover:bg-slate-800 hover:border-white transition-all cursor-pointer flex items-center justify-center p-0"
-                >
-                  {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                </button>
-
                 {/* Push notifications trigger */}
                 <button
                   onClick={toggleNotifications}
