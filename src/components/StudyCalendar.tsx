@@ -14,6 +14,18 @@ import { calculateTopicDates, formatDateLabel, getRealWaitTimeLabel } from '../u
 
 import { exportToICS, exportToImage, exportToPDF } from '../utils/exportCalendar';
 
+export const formatToShortDDMMAA = (dateStr: string) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const y = parts[0].slice(-2);
+    const m = parts[1];
+    const d = parts[2];
+    return `${d}/${m}/${y}`;
+  }
+  return dateStr;
+};
+
 interface StudyCalendarProps {
   topics: Topic[];
   onTopicsChange: (newTopics: Topic[]) => void;
@@ -27,6 +39,8 @@ interface StudyCalendarProps {
   onSpecialtyOrderChange?: (newOrder: string[]) => void;
   planStartDate: string;
   onPlanStartDateChange: (newDate: string) => void;
+  searchQuery?: string;
+  onSearchQueryChange?: (val: string) => void;
 }
 
 export default function StudyCalendar({ 
@@ -41,7 +55,9 @@ export default function StudyCalendar({
   specialtyOrder = [], 
   onSpecialtyOrderChange,
   planStartDate,
-  onPlanStartDateChange
+  onPlanStartDateChange,
+  searchQuery,
+  onSearchQueryChange
 }: StudyCalendarProps) {
   const [viewMode, setViewMode] = useState<'monthly' | 'tracker'>('monthly');
   const [calendarSubView, setCalendarSubView] = useState<'month' | 'week' | 'agenda' | 'day'>('month');
@@ -368,19 +384,19 @@ export default function StudyCalendar({
         <div className="flex gap-2">
           <button
             onClick={() => setViewMode('monthly')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-              viewMode === 'monthly' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+            className={`px-4 py-2 text-[10px] uppercase font-mono tracking-widest rounded-full transition-all flex items-center gap-2 cursor-pointer border ${
+              viewMode === 'monthly' ? 'bg-[#2a1b5c]/30 text-white border-[#9d8afe]' : 'bg-transparent border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            <LucideCalendar className="w-4 h-4" /> Calendario Unificado
+            <LucideCalendar className="w-3.5 h-3.5" /> Calendario
           </button>
           <button
             onClick={() => setViewMode('tracker')}
-            className={`px-4 py-2 text-xs font-bold rounded-xl transition-all flex items-center gap-2 cursor-pointer ${
-              viewMode === 'tracker' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+            className={`px-4 py-2 text-[10px] uppercase font-mono tracking-widest rounded-full transition-all flex items-center gap-2 cursor-pointer border ${
+              viewMode === 'tracker' ? 'bg-[#2a1b5c]/30 text-white border-[#9d8afe]' : 'bg-transparent border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            <ListTodo className="w-4 h-4" /> Tracker Detallado & Fechas
+            <ListTodo className="w-3.5 h-3.5" /> Tracker
           </button>
         </div>
 
@@ -558,6 +574,8 @@ export default function StudyCalendar({
           onSpecialtyOrderChange={onSpecialtyOrderChange}
           planStartDate={planStartDate}
           onPlanStartDateChange={onPlanStartDateChange}
+          searchQuery={searchQuery}
+          onSearchQueryChange={onSearchQueryChange}
         />
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 select-none">
@@ -578,13 +596,16 @@ export default function StudyCalendar({
                   </div>
                   
                   {/* Global Start Date quick picker synchronized */}
-                  <div className="flex items-center gap-2 bg-slate-950 px-3 py-1 rounded-lg border border-slate-800">
+                  <div className="relative flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 hover:border-slate-700 transition-colors cursor-pointer group">
                     <span className="text-[10px] font-bold text-slate-500 uppercase">Inicio Plan:</span>
+                    <span id="display-plan-start-date" className="text-[11px] font-bold text-indigo-455 dark:text-indigo-400 min-w-[70px] text-center select-none">
+                      {formatToShortDDMMAA(planStartDate)}
+                    </span>
                     <input 
                       type="date"
                       value={planStartDate}
                       onChange={(e) => onPlanStartDateChange(e.target.value)}
-                      className="bg-transparent text-[11px] font-bold text-indigo-400 focus:outline-none cursor-pointer text-center w-[95px]"
+                      className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
                     />
                   </div>
 

@@ -4,6 +4,18 @@ import { Search, GripVertical, Settings2, X, Calendar, RotateCcw } from 'lucide-
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import { calculateTopicDates, getWeekdayNameFromDate } from '../utils/srs';
 
+export const formatToShortDDMMAA = (dateStr: string) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3) {
+    const y = parts[0].slice(-2);
+    const m = parts[1];
+    const d = parts[2];
+    return `${d}/${m}/${y}`;
+  }
+  return dateStr;
+};
+
 const AnyDraggable = Draggable as any;
 
 const getWeekRangeStr = (mondayStr: string) => {
@@ -55,6 +67,8 @@ interface WeeklyTrackerProps {
   onSpecialtyOrderChange?: (newOrder: string[]) => void;
   planStartDate?: string;
   onPlanStartDateChange?: (newDate: string) => void;
+  searchQuery?: string;
+  onSearchQueryChange?: (val: string) => void;
 }
 
 export function WeeklyTracker({ 
@@ -68,9 +82,14 @@ export function WeeklyTracker({
   specialtyOrder = [], 
   onSpecialtyOrderChange,
   planStartDate = '2026-06-08',
-  onPlanStartDateChange
+  onPlanStartDateChange,
+  searchQuery,
+  onSearchQueryChange
 }: WeeklyTrackerProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const currentSearchQuery = searchQuery !== undefined ? searchQuery : localSearchQuery;
+  const setCurrentSearchQuery = (searchQuery !== undefined && onSearchQueryChange) ? onSearchQueryChange : setLocalSearchQuery;
+  
   const [showConfig, setShowConfig] = useState(false);
   
   // Outer drag and drop handler representing BOTH specialty list rearranging OR individual topic reordering
@@ -88,7 +107,7 @@ export function WeeklyTracker({
     
     // Case 2: Individual topic dragging
     if (result.source.droppableId === 'topics-list') {
-      if (searchQuery) return; // Disable topic dragging while search filter is active to avoid index bugs
+      if (currentSearchQuery) return; // Disable topic dragging while search filter is active to avoid index bugs
       const items = Array.from(topics);
       const [reorderedItem] = items.splice(result.source.index, 1);
       items.splice(result.destination.index, 0, reorderedItem);
@@ -97,12 +116,12 @@ export function WeeklyTracker({
   };
 
   const filteredTopics = useMemo(() => {
-    if (!searchQuery) return topics;
+    if (!currentSearchQuery) return topics;
     return topics.filter(t => 
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      t.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+      t.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) || 
+      t.specialty.toLowerCase().includes(currentSearchQuery.toLowerCase())
     );
-  }, [topics, searchQuery]);
+  }, [topics, currentSearchQuery]);
 
   // Calculate dynamic dates for all topics chronologically in the entire plan
   const computedDates = useMemo(() => {
@@ -225,15 +244,18 @@ export function WeeklyTracker({
         )}
 
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between border-t border-slate-800/60 pt-4">
-          <div className="flex flex-wrap items-center gap-3 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800">
+          <div className="relative flex flex-wrap items-center gap-3 bg-slate-800/40 p-2.5 rounded-xl border border-slate-800 hover:border-slate-750 transition-colors cursor-pointer group">
             <Calendar className="w-4 h-4 text-indigo-400 shrink-0" />
             <span className="text-xs font-bold text-slate-300 whitespace-nowrap">📅 Fecha del Día 1:</span>
-            <input 
-              type="date"
-              value={planStartDate}
-              onChange={(e) => onPlanStartDateChange && onPlanStartDateChange(e.target.value)}
-              className="bg-slate-950 border border-slate-700 rounded-lg px-2 py-1 text-xs text-white focus:outline-none focus:ring-1 focus:ring-indigo-500 font-semibold cursor-pointer text-center"
-            />
+            <div className="relative inline-flex items-center bg-slate-950 border border-slate-705 dark:border-slate-700/60 rounded-lg px-2.5 py-1 text-xs text-indigo-400 font-bold text-center min-w-[75px] select-none">
+              {formatToShortDDMMAA(planStartDate)}
+              <input 
+                type="date"
+                value={planStartDate}
+                onChange={(e) => onPlanStartDateChange && onPlanStartDateChange(e.target.value)}
+                className="absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10"
+              />
+            </div>
           </div>
           
           <div className="relative max-w-sm w-full sm:w-64">
@@ -241,8 +263,8 @@ export function WeeklyTracker({
             <input
               type="text"
               placeholder="Filtrar por tema o especialidad..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={currentSearchQuery}
+              onChange={(e) => setCurrentSearchQuery(e.target.value)}
               className="w-full pl-9 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -300,7 +322,7 @@ export function WeeklyTracker({
                   const activeWeekSun = studyConfig.weekOverrides?.[weekStr]?.sunday ?? studyConfig.globalSunday;
 
                   return (
-                    <AnyDraggable key={topic.id} draggableId={topic.id} index={index} isDragDisabled={!!searchQuery}>
+                    <AnyDraggable key={topic.id} draggableId={topic.id} index={index} isDragDisabled={!!currentSearchQuery}>
                       {(provided, snapshot) => (
                         <div
                           ref={provided.innerRef}
@@ -390,7 +412,7 @@ export function WeeklyTracker({
                             {/* Col 1: Day Name & Date */}
                             <div className="col-span-1 lg:col-span-2 flex items-center gap-2 md:gap-3">
                               {/* Drag handle ONLY shown if search isn't active */}
-                              {!searchQuery ? (
+                              {!currentSearchQuery ? (
                                 <div 
                                   {...provided.dragHandleProps} 
                                   className="p-1 text-slate-500 hover:text-indigo-400 rounded transition-colors cursor-grab active:cursor-grabbing shrink-0"
@@ -506,7 +528,7 @@ export function WeeklyTracker({
                               </div>
                               {prog.nextReviewDate && (
                                 <div className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/10 text-center w-full lg:max-w-fit truncate">
-                                  ⏰ Repaso: {new Date(prog.nextReviewDate + 'T00:00:00').toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}
+                                  ⏰ Repaso: {new Date(prog.nextReviewDate + 'T00:00:00').toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                                 </div>
                               )}
                             </div>

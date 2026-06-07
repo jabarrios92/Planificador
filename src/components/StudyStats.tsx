@@ -139,6 +139,35 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
     Repasos: reviewForecast[day]
   }));
 
+  // Calculate historical last 7 days metrics
+  const last7DaysData = [];
+  for (let i = 6; i >= 0; i--) {
+    const historicalDay = new Date();
+    historicalDay.setDate(today.getDate() - i);
+    const dayStr = historicalDay.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+    const isoDateStr = historicalDay.toISOString().split('T')[0];
+
+    let studied = 0;
+    let reviewed = 0;
+    
+    Object.values(topicsProgress).forEach(prog => {
+      const logsForDay = prog.reviewLog?.filter(log => log.date.split('T')[0] === isoDateStr) || [];
+      if (logsForDay.length > 0) {
+        const isStudy = logsForDay.some(l => l.elapsedDays === 0);
+        if (isStudy) studied++;
+        
+        const isReview = logsForDay.some(l => l.elapsedDays > 0);
+        if (isReview) reviewed++;
+      }
+    });
+
+    last7DaysData.push({
+      dia: dayStr,
+      Estudiados: studied,
+      Repasados: reviewed
+    });
+  }
+
   return (
     <div className="space-y-6">
       <div className="p-4 bg-gradient-to-r from-orange-500/10 to-rose-500/10 border border-orange-500/20 rounded-2xl flex items-center justify-between">
@@ -150,13 +179,13 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
             )}
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Racha de Estudio</h3>
-            <p className="text-[11px] text-slate-400 font-medium">Has estudiado o repasado consistentemente por los últimos {streakDays} días.</p>
+            <h3 className="text-xl font-serif text-white tracking-wide">Racha de Estudio</h3>
+            <p className="text-[10px] font-mono tracking-widest text-[#a79cb8] uppercase">HAS ESTUDIADO LOS ÚLTIMOS {streakDays} DÍAS.</p>
           </div>
         </div>
-        <div className="text-right">
-          <span className="text-3xl font-black text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]">{streakDays}</span>
-          <span className="text-xs text-orange-500/70 font-bold ml-1 uppercase tracking-widest">Días</span>
+        <div className="text-right flex items-baseline">
+          <span className="text-4xl font-serif text-[#e2dbea] drop-shadow-[0_0_15px_rgba(255,255,255,0.4)]">{streakDays}</span>
+          <span className="text-[10px] text-[#766a87] font-mono font-bold ml-2 uppercase tracking-[0.2em]">DÍAS</span>
         </div>
       </div>
 
@@ -210,10 +239,10 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
       {/* Main Charts area */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Global Mastery Breakdown Pie */}
-        <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
+        <div className="p-5 bg-transparent border border-slate-800 rounded-2xl space-y-4">
           <div className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5 text-indigo-400" />
-            <h4 className="font-semibold text-white text-sm">Distribución de Aprendizaje</h4>
+            <BarChart3 className="w-5 h-5 text-[#9d8afe]" />
+            <h4 className="font-serif text-[#e2dbea] text-xl tracking-wide uppercase">DISTRIBUCIÓN</h4>
           </div>
 
           <div className="h-64 flex flex-col items-center justify-center relative">
@@ -244,10 +273,10 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
         </div>
 
         {/* Volume Forecast Schedule (SRS Outlook) */}
-        <div className="p-5 bg-slate-900 border border-slate-800 rounded-2xl space-y-4">
+        <div className="p-5 bg-transparent border border-slate-800 rounded-2xl space-y-4">
           <div className="flex items-center gap-2">
-            <CalendarDays className="w-5 h-5 text-indigo-400" />
-            <h4 className="font-semibold text-white text-sm">Previsión de Repasos (Próximos 7 Días)</h4>
+            <CalendarDays className="w-5 h-5 text-[#9d8afe]" />
+            <h4 className="font-serif text-[#e2dbea] text-xl tracking-wide uppercase">PREVISIÓN</h4>
           </div>
 
           <div className="h-64">
@@ -255,8 +284,29 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
               <BarChart data={forecastData}>
                 <XAxis dataKey="dia" stroke="#64748b" fontSize={10} tickLine={false} />
                 <YAxis stroke="#64748b" fontSize={10} tickLine={false} allowDecimals={false} />
-                <Tooltip formatter={(value) => [`${value} temas`, 'Sugeridos']} />
-                <Bar dataKey="Repasos" fill="#6366f1" radius={[4, 4, 0, 0]} maxBarSize={40} />
+                <Tooltip formatter={(value) => [`${value} temas`, 'Sugeridos']} cursor={{fill: 'rgba(255,255,255,0.02)'}} />
+                <Bar dataKey="Repasos" fill="#9d8afe" radius={[4, 4, 0, 0]} maxBarSize={40} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Historical Study vs Review (Last 7 Days) */}
+        <div className="p-5 bg-transparent border border-slate-800 rounded-2xl space-y-4 lg:col-span-2">
+          <div className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-[#a5a1f6]" />
+            <h4 className="font-serif text-[#e2dbea] text-xl tracking-wide uppercase">RENDIMIENTO HISTÓRICO</h4>
+          </div>
+
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={last7DaysData}>
+                <XAxis dataKey="dia" stroke="#64748b" fontSize={10} tickLine={false} />
+                <YAxis stroke="#64748b" fontSize={10} tickLine={false} allowDecimals={false} />
+                <Tooltip />
+                <Legend wrapperStyle={{ fontSize: '11px' }} />
+                <Bar dataKey="Estudiados" fill="#10b981" radius={[2, 2, 0, 0]} maxBarSize={40} />
+                <Bar dataKey="Repasados" fill="#f59e0b" radius={[2, 2, 0, 0]} maxBarSize={40} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -278,7 +328,7 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
               <Tooltip formatter={(value, name) => [`${value} temas`, name]} />
               <Legend wrapperStyle={{ fontSize: '11px' }} />
               <Bar dataKey="Completados" stackId="a" fill="#10b981" radius={[0, 2, 2, 0]} />
-              <Bar dataKey="Pendientes" stackId="a" fill="#1e293b" radius={[0, 2, 2, 0]} />
+              <Bar dataKey="Pendientes" stackId="a" fill="var(--color-slate-800, #1e293b)" radius={[0, 2, 2, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

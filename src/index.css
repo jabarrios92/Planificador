@@ -1,43 +1,162 @@
 @import "tailwindcss";
 
 .light {
-  /* Backgrounds */
-  --color-slate-950: #f1f5f9; /* Slate 100 */
-  --color-slate-900: #ffffff; /* White card bg */
-  --color-slate-800: #e2e8f0; /* Slate 200 - Borders */
-  --color-slate-700: #cbd5e1; /* Slate 300 - Hover states */
-  --color-slate-600: #94a3b8; /* Slate 400 */
+  /* WCAG 2.2 AA / AAA Light Mode (Professional Medical System) */
+  /* Backgrounds & Surfaces */
+  --color-slate-950: #f4f4f5; /* App background - clean warm white */
+  --color-slate-900: #ffffff; /* Surface / Cards - pure white */
+  --color-slate-800: #e4e4e7; /* Borders, Inputs, subtle surfaces */
+  --color-slate-700: #d4d4d8; /* Hover states on surfaces, stronger borders */
+  --color-slate-600: #a1a1aa; /* Disabled elements, icons */
   
-  /* Text & Icons */
-  --color-slate-500: #64748b; /* Slate 500 - Muted text */
-  --color-slate-400: #475569; /* Slate 600 - Normal secondary text */
-  --color-slate-300: #334155; /* Slate 700 - Normal text */
-  --color-slate-200: #1e293b; /* Slate 800 - Headings */
-  --color-slate-100: #0f172a; /* Slate 900 */
-  --color-slate-50:  #020617; /* Slate 950 */
+  /* Typography - Strict Legibility Priority */
+  --color-slate-500: #52525b; /* Muted text (Contrast > 4.5:1 on white) */
+  --color-slate-400: #3f3f46; /* Secondary text */
+  --color-slate-300: #27272a; /* Primary body text (Contrast > 7:1) */
+  --color-slate-200: #18181b; /* Emphasized text & headings (Contrast > 10:1) */
+  --color-slate-100: #09090b; /* Strongest headings */
+  --color-slate-50:  #000000;
   
-  /* Pure White elements become Dark */
-  --color-white: #0f172a; 
+  /* Semantic Colors (Scaled down for minimum 4.5:1 contrast against light pastel backgrounds) */
+  /* Primary Actions & Selection */
+  --color-indigo-300: #2563eb; /* Blue 600 */
+  --color-indigo-400: #1d4ed8; /* Blue 700: High contrast for tags & small text */
+  --color-indigo-500: #1e40af; /* Blue 800: Strong hover */
+  --color-indigo-600: #1e3a8a; /* Blue 900: Primary buttons & active states */
   
-  /* Accents - darken them for visibility on light bg */
-  --color-indigo-400: #4f46e5; /* indigo-600 */
-  --color-indigo-500: #4338ca; /* indigo-700 */
+  /* Success states (e.g., completado, online) */
+  --color-emerald-300: #059669; /* Emerald 600 */
+  --color-emerald-400: #047857; /* Emerald 700 */
+  --color-emerald-500: #065f46; /* Emerald 800 */
   
-  --color-emerald-400: #059669; /* emerald-600 */
-  --color-emerald-500: #047857; /* emerald-700 */
+  /* Warnings, limits & difficult states */
+  --color-amber-300: #b45309; /* Amber 700 */
+  --color-amber-400: #92400e; /* Amber 800 */
+  --color-amber-500: #78350f; /* Amber 900 */
   
-  --color-amber-300: #d97706; /* amber-600 */
-  --color-amber-400: #ea580c; /* orange-600 */
-  --color-amber-500: #c2410c; /* orange-700 */
+  /* Danger, deletes & missed days */
+  --color-rose-300: #e11d48; /* Rose 600 */
+  --color-rose-400: #be123c; /* Rose 700 */
+  --color-rose-500: #9f1239; /* Rose 800 */
+  --color-rose-600: #881337; /* Rose 900 */
   
-  --color-rose-400: #e11d48; /* rose-600 */
-  --color-rose-500: #be123c; /* rose-700 */
-  --color-rose-600: #fb7185; /* inverted inside button */
+  /* Info badges */
+  --color-sky-300: #0284c7;  /* Sky 600 */
+  --color-sky-400: #0369a1;  /* Sky 700 */
+  --color-sky-500: #075985;  /* Sky 800 */
   
-  --color-sky-400: #0284c7;  /* sky-600 */
-  --color-sky-500: #0369a1;  /* sky-700 */
-  
-  --color-orange-400: #ea580c; /* orange-600 */
-  --color-orange-500: #c2410c; /* orange-700 */
+  /* Secondary actions / study levels */
+  --color-orange-300: #ea580c; /* Orange 600 */
+  --color-orange-400: #c2410c; /* Orange 700 */
+  --color-orange-500: #9a3412; /* Orange 800 */
 }
 
+.dark {
+  --color-slate-950: #0a061c;
+  --color-slate-900: #130a2a;
+  --color-slate-800: rgba(255, 255, 255, 0.08); /* Thin borders */
+  --color-slate-700: rgba(255, 255, 255, 0.15); /* Hover borders */
+  --color-indigo-600: #1a103c;
+  --color-indigo-500: #2a1b5c;
+  --color-indigo-400: #9d8afe;
+  --color-slate-300: #e2dbea;
+  --color-slate-400: #a79cb8;
+  --color-slate-500: #766a87;
+}
+
+body.dark, .dark body, .dark .bg-slate-950 {
+  background-color: #0a061c !important;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(24, 13, 54, 0.8) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(77, 27, 68, 0.6) 0px, transparent 60%),
+    radial-gradient(at 100% 0%, rgba(36, 17, 74, 0.5) 0px, transparent 50%) !important;
+  background-attachment: fixed !important;
+}
+
+.dark .bg-slate-900 {
+  background-color: rgba(19, 10, 42, 0.6) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .border-slate-800 {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .text-white {
+  color: #ffffff !important;
+}
+
+.noise-bg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
+
+.dark .noise-bg {
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+.font-serif, h1, h2 {
+  font-family: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+.dark .shadow-xl {
+  --tw-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.4), 0 12px 16px -8px rgba(0, 0, 0, 0.3), 0 0 40px -10px rgba(157, 138, 254, 0.15);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.dark .shadow-lg {
+  --tw-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2), 0 0 20px -5px rgba(157, 138, 254, 0.1);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.dark .shadow-md {
+  --tw-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.3), 0 2px 6px -2px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.light .shadow-xl {
+  --tw-shadow: 0 20px 40px -8px rgba(37, 99, 235, 0.08), 0 12px 16px -8px rgba(37, 99, 235, 0.04);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.light .shadow-lg {
+  --tw-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.06), 0 8px 10px -6px rgba(37, 99, 235, 0.04);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.light .shadow-md {
+  --tw-shadow: 0 4px 12px -2px rgba(37, 99, 235, 0.05), 0 2px 6px -2px rgba(37, 99, 235, 0.03);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+/* Subtler borders globally for light mode cards */
+.light .border-slate-800,
+.light .border-slate-700 {
+  border-color: var(--color-slate-800);
+}
+
+/* Intelligently invert white text in light mode, except when on explicitly colored backgrounds */
+.light .text-white:not(.bg-indigo-600):not(.bg-indigo-500):not(.bg-rose-600):not(.bg-rose-500):not(.bg-emerald-600):not(.bg-emerald-500):not(.bg-amber-600):not(.bg-amber-500):not(.bg-sky-500):not(.bg-orange-600):not(.bg-orange-500),
+.light .hover\:text-white:hover:not(.hover\:bg-indigo-600):not(.hover\:bg-rose-600):not(.bg-indigo-600):not(.bg-rose-600):not(.hover\:bg-indigo-500):not(.hover\:bg-rose-500) {
+  color: var(--color-slate-200); /* Dark text for typical white-rendered elements in light mode */
+}
+
+/* Restore nested elements inside primary solid elements to pure white */
+.light .bg-indigo-600 .text-white,
+.light .bg-indigo-500 .text-white,
+.light .bg-rose-600 .text-white,
+.light .bg-rose-500 .text-white,
+.light .bg-emerald-600 .text-white,
+.light .bg-amber-600 .text-white,
+.light .bg-sky-500 .text-white,
+.light .bg-indigo-600 .hover\:text-white:hover,
+.light .bg-rose-600 .hover\:text-white:hover {
+  color: #ffffff !important;
+}

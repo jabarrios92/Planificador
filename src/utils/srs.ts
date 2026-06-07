@@ -73,9 +73,9 @@ export function formatDateLabel(dateStr: string): string {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return '';
   return d.toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
   });
 }
 

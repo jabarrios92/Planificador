@@ -5,7 +5,7 @@ import {
   ChevronRight, CheckCircle2, AlertCircle, Clock, BookMarked, Save, 
   Sparkle, LogIn, LogOut, Check, ArrowRight, RefreshCw, Send, ChevronLeft, 
   CalendarDays, ExternalLink, ThumbsUp, AlertTriangle, Bell, BellOff, Info, GraduationCap,
-  X, Trash2, Download
+  X, Trash2, Download, Search
 } from 'lucide-react';
 
 import { auth, googleProvider, signInWithPopup, signInWithRedirect, signOut } from './lib/firebase';
@@ -31,6 +31,7 @@ import AICoach from './components/AICoach';
 import StudyStats from './components/StudyStats';
 import StudyCalendar from './components/StudyCalendar';
 import Boveda from './components/Boveda';
+import Home from './components/Home';
 
 export default function App() {
   const [studyConfig, setStudyConfig] = useState<StudyConfig>(() => {
@@ -45,7 +46,7 @@ export default function App() {
     setStudyConfig(newConfig);
     localStorage.setItem('studyConfig', JSON.stringify(newConfig));
   };
-  const [currentTab, setCurrentTab] = useState<'syllabus' | 'calendar' | 'stats' | 'profile' | 'boveda'>('syllabus');
+  const [currentTab, setCurrentTab] = useState<'home' | 'syllabus' | 'calendar' | 'profile' | 'boveda'>('home');
 
   // Tab scroll preservation logic
   const scrollPositionsRef = React.useRef<Record<string, number>>({});
@@ -81,6 +82,27 @@ export default function App() {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isSessionMode, setIsSessionMode] = useState(false);
 
+  const [dailySummaryModal, setDailySummaryModal] = useState(false);
+  const [notificationConfig, setNotificationConfig] = useState({
+    time: "20:00",
+    days: {
+      lunes: true,
+      martes: true,
+      miercoles: true,
+      jueves: true,
+      viernes: true,
+      sabado: false,
+      domingo: false
+    }
+  });
+
+  const toggleNotificationDay = (dayKey: string) => {
+    setNotificationConfig(prev => ({
+      ...prev,
+      days: { ...prev.days, [dayKey]: !prev.days[dayKey as keyof typeof prev.days] }
+    }));
+  };
+
   // iOS Cupertino style custom confirmation modal state
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
@@ -99,6 +121,9 @@ export default function App() {
     currentStep: 1,
     data: null
   });
+
+  // Global Search Query State for real-time filtering in StudyCalendar and Syllabus
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   
   // Custom Plan Start Date
   const [planStartDate, setPlanStartDate] = useState<string>(() => {
@@ -1167,7 +1192,8 @@ export default function App() {
 
   return (
     <div className={theme}>
-      <div className="min-h-screen bg-slate-950 font-sans text-slate-300 transition-colors duration-300 flex flex-col">
+      <div className="noise-bg mix-blend-overlay"></div>
+      <div className="min-h-screen bg-slate-950 font-sans text-slate-300 transition-colors duration-300 flex flex-col relative z-0">
         
         {/* Navigation Top Header Bar */}
         {!isSessionMode && (
@@ -1176,101 +1202,123 @@ export default function App() {
             
             {/* Logo and App Title */}
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-500/20 shrink-0">
-                <Stethoscope className="w-5 h-5" />
+              <div className="w-8 h-8 rounded-full border border-slate-700 flex items-center justify-center text-white shrink-0 bg-transparent relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/20 to-transparent"></div>
+                <Sparkles className="w-4 h-4" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-white tracking-tight leading-none mb-1">
-                  Planificador <span className="text-indigo-400">Clínico</span>
+                <span className="text-xl font-serif text-white tracking-widest leading-none mb-1 uppercase">
+                  Planificador
                 </span>
-                <span className="text-[11px] text-slate-400 font-medium tracking-wide leading-none pt-0.5">by Dr. Jorge Barrios</span>
+                <span className="text-[9px] text-[#9d8afe] font-mono tracking-[0.2em] leading-none uppercase">Clínico • Dr. Jorge Barrios</span>
               </div>
             </div>
 
+            {/* Global Search Bar (Real-time sync) */}
+            <div className="hidden lg:flex items-center gap-2 relative w-64 max-w-xs xl:w-72">
+              <Search className="w-3.5 h-3.5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                type="text"
+                placeholder="BÚSQUEDA GLOBAL..."
+                value={globalSearchQuery}
+                onChange={(e) => setGlobalSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-8 py-1.5 bg-transparent border border-slate-800 hover:border-slate-600 transition-all rounded-full text-[10px] font-mono tracking-widest text-[#e2dbea] placeholder-slate-500/70 focus:outline-none focus:border-white focus:bg-slate-900/40"
+              />
+              {globalSearchQuery && (
+                <button 
+                  onClick={() => setGlobalSearchQuery('')}
+                  className="absolute right-3 p-1 text-slate-500 hover:text-white text-[10px] cursor-pointer"
+                  title="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
             {/* In-tab switch indicators */}
-            <nav className="hidden md:flex items-center gap-2">
+            <nav className="hidden md:flex items-center gap-6">
               <button
-                onClick={() => setCurrentTab('syllabus')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  currentTab === 'syllabus'
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                onClick={() => setCurrentTab('home')}
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 flex items-center gap-1.5 ${
+                  currentTab === 'home'
+                    ? 'text-white border-white'
+                    : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
-                📚 Temas ({topics.length})
+                <Sparkles className="w-3.5 h-3.5" /> Inicio
+              </button>
+              <button
+                onClick={() => setCurrentTab('syllabus')}
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 ${
+                  currentTab === 'syllabus'
+                    ? 'text-white border-white'
+                    : 'text-slate-400 border-transparent hover:text-white'
+                }`}
+              >
+                Temas ({topics.length})
               </button>
               <button
                 onClick={() => setCurrentTab('calendar')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 ${
                   currentTab === 'calendar'
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-white border-white'
+                    : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
-                📅 Calendario
+                Calendario
               </button>
               <button
                 onClick={() => setCurrentTab('boveda')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer flex items-center gap-1.5 border-b-2 pb-1 ${
                   currentTab === 'boveda'
-                    ? 'bg-slate-800 text-white shadow-sm font-bold border border-indigo-500/10'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-[#9d8afe] border-[#9d8afe] font-bold'
+                    : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
-                🎓 La Bóveda
-              </button>
-              <button
-                onClick={() => setCurrentTab('stats')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
-                  currentTab === 'stats'
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
-                }`}
-              >
-                📊 Estadísticas
+                La Bóveda
               </button>
               <button
                 onClick={() => setCurrentTab('profile')}
-                className={`px-4 py-2 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 ${
                   currentTab === 'profile'
-                    ? 'bg-slate-800 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-white'
+                    ? 'text-white border-white'
+                    : 'text-slate-400 border-transparent hover:text-white'
                 }`}
               >
-                👤 Nube & Perfil
+                Nube & Perfil
               </button>
             </nav>
 
             {/* Quick action tools */}
             <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 {/* Theme toggle */}
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                   title={`Cambiar a modo ${theme === 'dark' ? 'claro' : 'oscuro'}`}
-                  className="p-2 rounded-xl border border-slate-800 text-slate-400 bg-slate-900 transition-all cursor-pointer"
+                  className="w-8 h-8 rounded-full border border-slate-800 text-[#e2dbea] bg-transparent hover:bg-slate-800 hover:border-white transition-all cursor-pointer flex items-center justify-center p-0"
                 >
-                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
                 </button>
 
                 {/* Push notifications trigger */}
                 <button
                   onClick={toggleNotifications}
                   title="Configurar Notificaciones"
-                  className={`p-2 rounded-xl border transition-all cursor-pointer ${
+                  className={`w-8 h-8 rounded-full border transition-all cursor-pointer flex items-center justify-center p-0 ${
                     notificationEnabled 
-                      ? 'bg-indigo-900/20 border-indigo-500/20 text-indigo-400' 
-                      : 'border-slate-800 text-slate-400 bg-slate-900'
+                      ? 'border-[#9d8afe] text-[#9d8afe] bg-[#2a1b5c]/30' 
+                      : 'border-slate-800 text-[#766a87] bg-transparent hover:border-white hover:text-white'
                   }`}
                 >
-                  {notificationEnabled ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+                  {notificationEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
                 </button>
               </div>
 
               {/* Status indicator backup */}
-              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-full border border-slate-700">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1 bg-transparent rounded-full border border-slate-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#9d8afe] opacity-80 shadow-[0_0_8px_rgba(157,138,254,0.8)] animate-pulse" />
+                <span className="text-[9px] font-mono font-bold text-[#e2dbea] uppercase tracking-[0.2em]">
                   ONLINE
                 </span>
               </div>
@@ -1281,11 +1329,20 @@ export default function App() {
 
         {/* Mobile bottom nav utilities bar */}
         {!isSessionMode && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 py-2 border-t border-slate-800 bg-slate-900/95 backdrop-blur z-50 flex justify-around">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 py-2 border-t border-slate-800 bg-slate-900/95 backdrop-blur z-40 flex justify-around">
+          <button
+            onClick={() => setCurrentTab('home')}
+            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
+              currentTab === 'home' ? 'text-[#9d8afe]' : 'text-slate-400'
+            }`}
+          >
+            <Sparkles className="w-4.5 h-4.5" />
+            <span>Inicio</span>
+          </button>
           <button
             onClick={() => setCurrentTab('syllabus')}
             className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
-              currentTab === 'syllabus' ? 'text-sky-500' : 'text-slate-400'
+              currentTab === 'syllabus' ? 'text-[#9d8afe]' : 'text-slate-400'
             }`}
           >
             <BookOpen className="w-4.5 h-4.5" />
@@ -1303,20 +1360,11 @@ export default function App() {
           <button
             onClick={() => setCurrentTab('boveda')}
             className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
-              currentTab === 'boveda' ? 'text-indigo-400 font-bold' : 'text-slate-400'
+              currentTab === 'boveda' ? 'text-[#9d8afe] font-bold' : 'text-slate-400'
             }`}
           >
             <GraduationCap className="w-4.5 h-4.5" />
             <span>Bóveda</span>
-          </button>
-          <button
-            onClick={() => setCurrentTab('stats')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
-              currentTab === 'stats' ? 'text-sky-500' : 'text-slate-400'
-            }`}
-          >
-            <BarChart3 className="w-4.5 h-4.5" />
-            <span>Estadísticas</span>
           </button>
           <button
             onClick={() => setCurrentTab('profile')}
@@ -1373,6 +1421,14 @@ export default function App() {
 
           {/* TAB PANELS ELEMENT */}
 
+          <div className={currentTab === 'home' ? '' : 'hidden'}>
+            <Home 
+              topics={topics}
+              topicsProgress={topicsProgress}
+              onNavigate={setCurrentTab}
+            />
+          </div>
+
           {/* Tab 1: Syllabus & AI Mentor (Splitted layouts grid) */}
           <div className={currentTab === 'syllabus' ? '' : 'hidden'}>
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -1390,26 +1446,32 @@ export default function App() {
                         {topics.length} Temas
                       </span>
                     </div>
-                    <button
-                      id="btn-master-reset-progress"
-                      type="button"
-                      onClick={() => {
-                        setConfirmModal({
-                          isOpen: true,
-                          type: 'master_reset',
-                          title: '⚠️ REINICIO MAESTRO DE DATOS (Paso 1 de 4)',
-                          message: 'Estás por reiniciar absolutamente todos los temas de estudio en la aplicación. Esto borrará el progreso de cada especialidad y regresará todos los temas a "Sin Empezar". ¿Deseas iniciar este proceso de confirmación?',
-                          stepsRequired: 4,
-                          currentStep: 1,
-                          data: null
-                        });
-                      }}
-                      className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/15 border border-rose-500/20 shadow-sm shadow-rose-950/20 rounded-lg hover:bg-rose-500/25 active:bg-rose-500/35 transition-all flex items-center gap-1 cursor-pointer self-start sm:self-auto"
-                      title="Reiniciar todo el avance del plan de estudios clínico (4 pasos de confirmación)"
-                    >
-                      <Trash2 className="w-3 h-3 animate-pulse" />
-                      Reseteo Maestro
-                    </button>
+                    <div className="relative group/tooltip">
+                      <button
+                        id="btn-master-reset-progress"
+                        type="button"
+                        onClick={() => {
+                          setConfirmModal({
+                            isOpen: true,
+                            type: 'master_reset',
+                            title: '⚠️ REINICIO MAESTRO DE DATOS (Paso 1 de 4)',
+                            message: 'Estás por reiniciar absolutamente todos los temas de estudio en la aplicación. Esto borrará el progreso de cada especialidad y regresará todos los temas a "Sin Empezar". ¿Deseas iniciar este proceso de confirmación?',
+                            stepsRequired: 4,
+                            currentStep: 1,
+                            data: null
+                          });
+                        }}
+                        className="px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-rose-400 bg-rose-500/15 border border-rose-500/20 shadow-sm shadow-rose-950/20 rounded-lg hover:bg-rose-500/25 active:bg-rose-500/35 transition-all flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+                        title="Reiniciar todo el avance del plan de estudios clínico (4 pasos de confirmación)"
+                      >
+                        <Trash2 className="w-3 h-3 animate-pulse" />
+                        Reseteo Maestro
+                      </button>
+                      <div className="absolute right-0 bottom-full mb-2 bg-slate-950 text-slate-200 border border-slate-800 text-[10px] p-2.5 rounded-xl w-56 shadow-2xl pointer-events-none transition-all duration-250 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible z-40 font-medium normal-case flex flex-col gap-1 text-left leading-normal">
+                        <span className="font-bold text-rose-400 flex items-center gap-1">⚠️ Impacto Crítico:</span>
+                        <span>Resetea a cero todo el avance e histórico SRS de todos tus temas en la app y base de datos (Requiere confirmación en 4 pasos).</span>
+                      </div>
+                    </div>
                   </div>
                   <Syllabus 
                     topics={topics}
@@ -1421,6 +1483,8 @@ export default function App() {
                     onSpecialtyOrderChange={handleSpecialtyOrderChange}
                     onTopicsChange={handleTopicsChange}
                     onSetTopicPriority={handleSetTopicPriority}
+                    searchQuery={globalSearchQuery}
+                    onSearchQueryChange={setGlobalSearchQuery}
                     onDeleteTopic={(topicId) => {
                       const topicToDelete = topics.find(t => t.id === topicId);
                       if (topicToDelete) {
@@ -1487,43 +1551,55 @@ export default function App() {
                             <span>{isSessionMode ? "Salir" : "Sesión"}</span>
                           </button>
 
-                          <button
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                type: 'reset_topic',
-                                title: 'Reajustar Tema a Cero (Paso 1 de 2)',
-                                message: `¿Estás seguro de que deseas restablecer el progreso de '${activeTopic.title}'? Conservarás el tema en la lista, pero se vaciará todo su historial, perlas y estados SRS de forma irreversible.`,
-                                stepsRequired: 2,
-                                currentStep: 1,
-                                data: { topicId: activeTopic.id, topicTitle: activeTopic.title }
-                              });
-                            }}
-                            className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-500/30 rounded-lg text-[10px] font-bold uppercase cursor-pointer transition-colors shrink-0"
-                            title="Reiniciar todo el progreso de este tema"
-                          >
-                            <RefreshCw className="w-3 h-3 text-amber-500" />
-                            <span>Reiniciar Progreso</span>
-                          </button>
+                          <div className="relative group/tooltip">
+                            <button
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  type: 'reset_topic',
+                                  title: 'Reajustar Tema a Cero (Paso 1 de 2)',
+                                  message: `¿Estás seguro de que deseas restablecer el progreso de '${activeTopic.title}'? Conservarás el tema en la lista, pero se vaciará todo su historial, perlas y estados SRS de forma irreversible.`,
+                                  stepsRequired: 2,
+                                  currentStep: 1,
+                                  data: { topicId: activeTopic.id, topicTitle: activeTopic.title }
+                                });
+                              }}
+                              className="flex items-center gap-1.5 px-2.5 py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/20 hover:border-amber-500/30 rounded-lg text-[10px] font-bold uppercase cursor-pointer transition-colors shrink-0"
+                              title="Reiniciar todo el progreso de este tema"
+                            >
+                              <RefreshCw className="w-3 h-3 text-amber-500" />
+                              <span>Reiniciar Progreso</span>
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-2 bg-slate-950 text-slate-200 border border-slate-850 text-[10px] p-2.5 rounded-xl w-52 shadow-2xl pointer-events-none transition-all duration-250 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible z-45 font-medium normal-case flex flex-col gap-1 text-left leading-normal">
+                              <span className="font-bold text-amber-400 flex items-center gap-1">⚠️ Impacto de Reajuste:</span>
+                              <span>Restablece a cero y borra todo el historial y estados de repetición espaciada SRS de este tema, pero lo conserva en tu catálogo.</span>
+                            </div>
+                          </div>
 
-                          <button
-                            onClick={() => {
-                              setConfirmModal({
-                                isOpen: true,
-                                type: 'delete_topic',
-                                title: 'Eliminar Tema del Catálogo',
-                                message: `¿Estás completamente seguro de que deseas eliminar permanentemente el tema '${activeTopic.title}'? Esta acción eliminará el tema clínico de todo tu plan, calendarios y estadísticas.`,
-                                stepsRequired: 1,
-                                currentStep: 1,
-                                data: { topicId: activeTopic.id }
-                              });
-                            }}
-                            className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-600/15 hover:bg-rose-600/25 text-rose-400 border border-rose-500/20 hover:border-rose-500/30 rounded-lg text-[10px] font-bold uppercase cursor-pointer transition-colors shrink-0"
-                            title="Eliminar tema permanentemente"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-rose-400" />
-                            <span>Eliminar Tema</span>
-                          </button>
+                          <div className="relative group/tooltip">
+                            <button
+                              onClick={() => {
+                                setConfirmModal({
+                                  isOpen: true,
+                                  type: 'delete_topic',
+                                  title: 'Eliminar Tema del Catálogo',
+                                  message: `¿Estás completamente seguro de que deseas eliminar permanentemente el tema '${activeTopic.title}'? Esta acción eliminará el tema clínico de todo tu plan, calendarios y estadísticas.`,
+                                  stepsRequired: 1,
+                                  currentStep: 1,
+                                  data: { topicId: activeTopic.id }
+                                });
+                              }}
+                              className="flex items-center gap-1.5 px-2.5 py-1 bg-rose-600/15 hover:bg-rose-600/25 text-rose-400 border border-rose-500/20 hover:border-rose-500/30 rounded-lg text-[10px] font-bold uppercase cursor-pointer transition-colors shrink-0"
+                              title="Eliminar tema permanentemente"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                              <span>Eliminar Tema</span>
+                            </button>
+                            <div className="absolute right-0 bottom-full mb-2 bg-slate-950 text-slate-200 border border-slate-850 text-[10px] p-2.5 rounded-xl w-52 shadow-2xl pointer-events-none transition-all duration-250 opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible z-45 font-medium normal-case flex flex-col gap-1 text-left leading-normal">
+                              <span className="font-bold text-rose-400 flex items-center gap-1">⚠️ Impacto Crítico:</span>
+                              <span>Elimina el tema permanentemente de tu catálogo, planes de estudio, calendarios e históricos de repetición.</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -1559,7 +1635,7 @@ export default function App() {
                             REPASOS: <strong className="text-white">{activeProgress.repetitionsCount}</strong>
                           </span>
                           <span className="flex items-center gap-1.5 border-l border-slate-700 pl-6">
-                            ÚLTIMA REV: <strong className="text-white">{new Date(activeProgress.lastReviewedAt).toLocaleDateString()}</strong>
+                            ÚLTIMA REV: <strong className="text-white">{new Date(activeProgress.lastReviewedAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })}</strong>
                           </span>
                           <span className="flex items-center gap-1.5 border-l border-slate-700 pl-6">
                             SRS: <strong className="text-white">{activeProgress.reviewInterval} días</strong>
@@ -1660,42 +1736,51 @@ export default function App() {
                           <button
                             id="btn-rate-otra-vez"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Otra vez')}
-                            className="p-3 bg-red-500/10 hover:bg-red-500/15 active:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className="p-3 bg-rose-500/10 hover:bg-rose-500/15 active:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-700 dark:text-rose-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
                           >
-                            <span className="text-normal">1: Otra vez</span>
-                            <span className="text-[9px] text-red-300/80 font-medium font-mono">
+                            <span className="text-normal">Otra vez</span>
+                            <span className="text-[9px] text-rose-600/80 dark:text-rose-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Otra vez', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '1d')}
                             </span>
                           </button>
                           <button
                             id="btn-rate-dificil"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Difícil')}
-                            className="p-3 bg-orange-500/10 hover:bg-orange-500/15 active:bg-orange-500/20 border border-orange-500/20 hover:border-orange-500/40 text-orange-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className="p-3 bg-amber-500/10 hover:bg-amber-500/15 active:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
                           >
-                            <span className="text-normal">2: Difícil</span>
-                            <span className="text-[9px] text-orange-300/80 font-medium font-mono">
+                            <span className="text-normal">Difícil</span>
+                            <span className="text-[9px] text-amber-600/80 dark:text-amber-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Difícil', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×1.2')}
                             </span>
                           </button>
                           <button
                             id="btn-rate-bien"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Bien')}
-                            className="p-3 bg-sky-500/10 hover:bg-sky-500/15 active:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 text-sky-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className="p-3 bg-sky-500/10 hover:bg-sky-500/15 active:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 text-sky-700 dark:text-sky-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
                           >
-                            <span className="text-normal">3: Bien</span>
-                            <span className="text-[9px] text-sky-300/80 font-medium font-mono">
+                            <span className="text-normal">Bien</span>
+                            <span className="text-[9px] text-sky-600/80 dark:text-sky-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Bien', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×2.0')}
                             </span>
                           </button>
                           <button
                             id="btn-rate-facil"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Fácil')}
-                            className="p-3 bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className="p-3 bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
                           >
-                            <span className="text-normal">4: Fácil</span>
-                            <span className="text-[9px] text-emerald-300/80 font-medium font-mono">
+                            <span className="text-normal">Fácil</span>
+                            <span className="text-[9px] text-emerald-600/80 dark:text-emerald-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Fácil', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×3.5')}
                             </span>
+                          </button>
+                        </div>
+                        
+                        <div className="pt-2">
+                          <button
+                            onClick={() => setDailySummaryModal(true)}
+                            className="w-full py-3 bg-indigo-600/10 hover:bg-indigo-600/20 active:bg-indigo-600/30 text-indigo-400 border border-indigo-500/20 font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+                          >
+                            <CheckCircle2 className="w-4 h-4" /> Finalizar Sesión Clínica del Día
                           </button>
                         </div>
                       </div>
@@ -1740,18 +1825,9 @@ export default function App() {
                 onSpecialtyOrderChange={handleSpecialtyOrderChange}
                 planStartDate={planStartDate}
                 onPlanStartDateChange={handlePlanStartDateChange}
+                searchQuery={globalSearchQuery}
+                onSearchQueryChange={setGlobalSearchQuery}
               />
-            </div>
-          </div>
-
-          {/* Tab 3: Detailed study statistics */}
-          <div className={currentTab === 'stats' ? '' : 'hidden'}>
-            <div className="space-y-4">
-              <div className="px-2">
-                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Métricas de Rendimiento Clínico</h2>
-                <p className="text-sm text-slate-300">Analiza tus avances por especialidad médica y proyección de estudio semanal.</p>
-              </div>
-              <StudyStats topicsProgress={topicsProgress} />
             </div>
           </div>
 
@@ -1977,6 +2053,58 @@ export default function App() {
                 </div>
               )}
 
+              {/* Advanced Notification Settings */}
+              <div className="pt-6 border-t border-slate-800 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-500/10 text-orange-400 flex items-center justify-center shrink-0">
+                    <Bell className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">Configuración de Recordatorios</h3>
+                    <p className="text-[11px] text-slate-400">Elige a qué hora y qué días quieres recibir recordatorios.</p>
+                  </div>
+                </div>
+
+                <div className="bg-slate-950/50 rounded-xl border border-slate-800 p-4 space-y-4">
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 min-w-16">Días</span>
+                    <div className="flex flex-wrap gap-1.5 flex-1">
+                      {Object.keys(notificationConfig.days).map((dayKey) => (
+                        <button
+                          key={dayKey}
+                          onClick={() => toggleNotificationDay(dayKey)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer border ${
+                            notificationConfig.days[dayKey as keyof typeof notificationConfig.days]
+                              ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30 shadow-[0_0_10px_rgba(79,70,229,0.1)]'
+                              : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
+                          }`}
+                        >
+                          {dayKey.charAt(0).toUpperCase() + dayKey.slice(1, 3)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <span className="text-[10px] uppercase font-bold text-slate-500 min-w-16">Hora</span>
+                    <input
+                      type="time"
+                      value={notificationConfig.time}
+                      onChange={(e) => setNotificationConfig(prev => ({ ...prev, time: e.target.value }))}
+                      className="bg-slate-900 border border-slate-800 text-slate-300 text-sm font-medium rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500/50"
+                    />
+                  </div>
+                  <div className="pt-2">
+                     <button
+                        onClick={() => showToast('Configuración de notificaciones guardada en el dispositivo.')}
+                        className="px-4 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-400 border border-indigo-500/20 font-bold rounded-xl text-xs transition-all cursor-pointer"
+                     >
+                       Guardar Preferencias
+                     </button>
+                  </div>
+                </div>
+              </div>
+
               {/* Offline parameters info */}
               <div className="pt-6 border-t border-slate-800 text-xs text-slate-500 leading-relaxed text-center font-medium">
                 Cumplimos estrictamente las políticas de Google GCP. La integración utiliza tu clave de API Gemini de forma transparente desde el servidor Express para mayor seguridad.
@@ -2067,6 +2195,65 @@ export default function App() {
                   className="px-4 py-1.5 text-[11px] font-bold bg-rose-600 hover:bg-rose-500 text-white rounded-lg transition-all cursor-pointer shadow-md shadow-rose-950/60"
                 >
                   {confirmModal.currentStep < confirmModal.stepsRequired ? 'Siguiente paso →' : 'Confirmar'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Daily Summary Modal */}
+        {dailySummaryModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm select-none">
+            <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-2xl transform scale-100 transition-all">
+              <div className="p-6 space-y-6">
+                <div className="text-center space-y-2">
+                  <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <h3 className="text-xl font-bold text-white tracking-tight">¡Día Completado!</h3>
+                  <p className="text-xs text-slate-400">Resumen de tu desempeño clínico de hoy.</p>
+                </div>
+                
+                <div className="bg-slate-950/50 p-4 border border-slate-800 rounded-2xl space-y-3">
+                  {(() => {
+                    const todayStr = new Date().toISOString().split('T')[0];
+                    let studiedToday = 0;
+                    let reviewedToday = 0;
+                    let hardCount = 0;
+                    
+                    Object.values(topicsProgress).forEach((prog: any) => {
+                      const logsForDay = prog.reviewLog?.filter((l: any) => l.date.split('T')[0] === todayStr) || [];
+                      if (logsForDay.length > 0) {
+                        if (logsForDay.some((l: any) => l.interval === 0)) studiedToday++;
+                        if (logsForDay.some((l: any) => l.interval > 0)) reviewedToday++;
+                        if (logsForDay.some((l: any) => l.rating === 'Difícil' || l.rating === 'Otra vez')) hardCount++;
+                      }
+                    });
+
+                    return (
+                      <div className="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                          <div className="text-2xl font-black text-emerald-400">{studiedToday}</div>
+                          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Nuevos Estudiados</div>
+                        </div>
+                        <div>
+                          <div className="text-2xl font-black text-indigo-400">{reviewedToday}</div>
+                          <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Repasados</div>
+                        </div>
+                        <div className="col-span-2 border-t border-slate-800 pt-3">
+                           <div className="text-xl font-black text-orange-400">{hardCount}</div>
+                           <div className="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Encontrados Difíciles</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+                
+                <button
+                  onClick={() => setDailySummaryModal(false)}
+                  className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-indigo-500/20 cursor-pointer"
+                >
+                  Cerrar
                 </button>
               </div>
             </div>

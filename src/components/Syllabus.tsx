@@ -133,6 +133,8 @@ interface SyllabusProps {
   onSpecialtyOrderChange?: (newOrder: string[]) => void;
   onTopicsChange?: (newTopics: Topic[]) => void;
   onSetTopicPriority?: (topicId: string, priority: 'Alta' | 'Media' | 'Baja' | null) => void;
+  searchQuery?: string;
+  onSearchQueryChange?: (val: string) => void;
 }
 
 export default function Syllabus({ 
@@ -146,9 +148,14 @@ export default function Syllabus({
   onResetSpecialty,
   onSpecialtyOrderChange,
   onTopicsChange,
-  onSetTopicPriority
+  onSetTopicPriority,
+  searchQuery,
+  onSearchQueryChange
 }: SyllabusProps) {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [localSearchQuery, setLocalSearchQuery] = useState('');
+  const currentSearchQuery = searchQuery !== undefined ? searchQuery : localSearchQuery;
+  const setCurrentSearchQuery = (searchQuery !== undefined && onSearchQueryChange) ? onSearchQueryChange : setLocalSearchQuery;
+
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [difficultyFilter, setDifficultyFilter] = useState<string>('all');
   const [expandedSpecialties, setExpandedSpecialties] = useState<Record<string, boolean>>({});
@@ -294,8 +301,8 @@ export default function Syllabus({
 
   // Filter topics using props topics
   const filteredTopics = topics.filter(t => {
-    const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          t.specialty.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = t.title.toLowerCase().includes(currentSearchQuery.toLowerCase()) || 
+                          t.specialty.toLowerCase().includes(currentSearchQuery.toLowerCase());
     const progress = topicsProgress[t.id];
     const isGraduated = progress?.isGraduated === true;
     const status = progress ? progress.status : 'Sin Empezar';
@@ -320,7 +327,7 @@ export default function Syllabus({
     return matchesSearch && matchesStatus && matchesDifficulty;
   });
 
-  const hasActiveFilters = searchQuery !== '' || statusFilter !== 'all' || difficultyFilter !== 'all';
+  const hasActiveFilters = currentSearchQuery !== '' || statusFilter !== 'all' || difficultyFilter !== 'all';
 
   // Calculate statistics of completed items per specialty
   const getSpecialtyStats = (specialtyName: string) => {
@@ -346,8 +353,8 @@ export default function Syllabus({
             <input
               type="text"
               placeholder="Buscar temas médicos (ej: pancreatitis, sepsis, debilidad)..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={currentSearchQuery}
+              onChange={(e) => setCurrentSearchQuery(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
             />
           </div>
@@ -461,36 +468,36 @@ export default function Syllabus({
         {recommendedTopic && (
           <div 
             onClick={() => onSelectTopic(recommendedTopic.id)}
-            className={`p-4 bg-gradient-to-br from-indigo-950/45 to-slate-900/60 border border-indigo-505/20 rounded-2xl cursor-pointer hover:border-indigo-500/55 hover:shadow-lg hover:shadow-indigo-500/5 transition-all duration-300 space-y-2.5 shadow-md relative overflow-hidden group ${
-              selectedTopicId === recommendedTopic.id ? 'ring-1 ring-indigo-500 bg-indigo-950/15' : ''
+            className={`p-5 bg-gradient-to-br from-[#807BD2]/15 via-slate-550/0 to-[#807BD2]/22 dark:from-[#807BD2]/22 dark:via-transparent dark:to-[#807BD2]/30 border border-[#807BD2]/25 dark:border-[#807BD2]/20 rounded-2xl cursor-pointer hover:border-[#807BD2]/45 dark:hover:border-[#807BD2]/40 hover:shadow-lg hover:shadow-[#807BD2]/5 transition-all duration-300 space-y-2.5 shadow-md relative overflow-hidden group ${
+              selectedTopicId === recommendedTopic.id ? 'ring-1 ring-[#807BD2]/50 bg-slate-50/20 dark:bg-slate-900/10' : ''
             }`}
           >
             {/* Subtle decorative background light */}
-            <div className="absolute -right-12 -top-12 w-24 h-24 bg-indigo-500/10 rounded-full blur-xl pointer-events-none" />
+            <div className="absolute -right-12 -top-12 w-24 h-24 bg-[#807BD2]/15 dark:bg-[#807BD2]/20 rounded-full blur-xl pointer-events-none" />
             
             <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-indigo-400 bg-indigo-500/10 border border-indigo-500/15 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 animate-pulse">
-                <Sparkles className="w-3 h-3 text-indigo-400 shrink-0" />
+              <span className="text-[10px] uppercase font-bold tracking-widest text-black dark:text-[#a5a1f6] bg-[#807BD2]/12 border border-[#807BD2]/20 px-2.5 py-0.5 rounded-md flex items-center gap-1.5 animate-pulse">
+                <Sparkles className="w-3 h-3 text-black dark:text-[#a5a1f6] shrink-0" />
                 {isScheduledToday ? 'Tema Agendado para Hoy' : 'Último Tema Agendado'}
               </span>
-              <span className="text-[9px] uppercase font-bold tracking-wider text-slate-500">
+              <span className="text-[9px] uppercase font-bold tracking-wider text-black dark:text-slate-400">
                 Bienvenida ✨
               </span>
             </div>
 
             <div className="space-y-1">
-              <p className="text-[11px] text-slate-400 font-medium leading-none">
-                ¡Hola! Para hoy te sugerimos continuar con el estudio de:
+              <p className="text-[11px] text-black dark:text-slate-300 font-mono tracking-widest leading-none uppercase mb-2">
+                CONTINUAR CON EL ESTUDIO DE:
               </p>
-              <h4 className="text-sm font-bold text-white tracking-tight leading-snug group-hover:text-indigo-300 transition-colors">
+              <h4 className="text-2xl font-serif font-medium text-black dark:text-white tracking-tight leading-snug group-hover:text-[#6e68d3] dark:group-hover:text-[#a6a1fb] transition-colors">
                 {recommendedTopic.title}
               </h4>
-              <div className="flex items-center gap-1.5 pt-0.5">
-                <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider bg-slate-800/40 px-2 py-0.5 rounded border border-slate-700/50">
+              <div className="flex items-center gap-2 pt-2">
+                <span className="text-[9px] text-black dark:text-[#a5a1f6] font-mono uppercase tracking-[0.2em] px-2 py-0.5 rounded-full border border-slate-300 dark:border-[#a5a1f6]/30">
                   {recommendedTopic.specialty}
                 </span>
                 {topicsProgress[recommendedTopic.id] && (
-                  <span className="text-[9px] font-bold text-slate-500">
+                  <span className="text-[9px] font-bold text-black dark:text-slate-400">
                     Repasos realizados: {topicsProgress[recommendedTopic.id].repetitionsCount}
                   </span>
                 )}
@@ -537,14 +544,14 @@ export default function Syllabus({
                           <div
                             ref={providedDrag.innerRef}
                             {...providedDrag.draggableProps}
-                            className={`bg-slate-800/40 border border-slate-700/85 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
-                              snapshotDrag.isDragging ? 'ring-2 ring-indigo-500 bg-slate-900 border-indigo-500/35 scale-[1.012] shadow-2xl z-50' : ''
+                            className={`bg-transparent border border-slate-800 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
+                              snapshotDrag.isDragging ? 'ring-1 ring-[#a5a1f6] bg-slate-900 border-[#a5a1f6]/30 scale-[1.012] shadow-xl z-50' : ''
                             }`}
                           >
                             {/* Header trigger */}
                             <div
-                              className={`flex items-center justify-between p-4 select-none border-b border-transparent transition-colors ${
-                                isExpanded ? 'bg-slate-800/80 border-slate-700' : ''
+                              className={`flex items-center justify-between p-4 select-none border-b border-transparent transition-colors hover:bg-slate-900/30 ${
+                                isExpanded ? 'bg-slate-900/50 border-slate-800' : ''
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -562,14 +569,14 @@ export default function Syllabus({
                                   onClick={() => !hasActiveFilters && toggleSpecialty(spec.name)}
                                   className={`flex items-center gap-3 ${!hasActiveFilters ? 'cursor-pointer' : ''}`}
                                 >
-                                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center bg-slate-800 border border-slate-700`}>
-                                    <GroupIcon className="w-5 h-5 text-indigo-400" />
+                                  <div className={`w-9 h-9 rounded-full flex items-center justify-center bg-transparent border border-slate-800 shrink-0`}>
+                                    <GroupIcon className="w-4 h-4 text-[#e2dbea]" />
                                   </div>
                                   <div>
-                                    <h4 className="text-sm font-semibold text-white">
+                                    <h4 className="text-[14px] font-serif tracking-widest text-white uppercase">
                                       {spec.name}
                                     </h4>
-                                    <span className="text-[11px] text-slate-400 font-medium">
+                                    <span className="text-[10px] text-[#766a87] uppercase font-mono tracking-[0.1em]">
                                       Progreso: {stats.studied} de {stats.total} temas ({stats.percentage}%)
                                     </span>
                                   </div>
@@ -666,7 +673,7 @@ export default function Syllabus({
                                                     {!compactView && progress?.nextReviewDate && !progress.isGraduated && (
                                                       <span className="text-[10px] text-amber-500/90 font-medium flex items-center gap-0.5">
                                                         <Calendar className="w-3 h-3 text-amber-500" />
-                                                        Próximo: {new Date(progress.nextReviewDate).toLocaleDateString()}
+                                                        Próximo: {new Date(progress.nextReviewDate).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit' })}
                                                       </span>
                                                     )}
                                                   </div>
@@ -765,16 +772,23 @@ export default function Syllabus({
               <p className="text-sm font-bold text-white mt-1 leading-snug">{activeMenuSpecialty}</p>
             </div>
             <div className="p-2 space-y-1 bg-slate-900">
-              <button
-                onClick={() => {
-                  setActiveMenuSpecialty(null);
-                  onResetSpecialty?.(activeMenuSpecialty);
-                }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-rose-450 hover:bg-rose-500/10 hover:text-rose-400 rounded-2xl text-xs font-bold transition-all cursor-pointer text-left"
-              >
-                <LucideIcons.RefreshCw className="w-4 h-4 text-rose-500" />
-                Restablecer Especialidad (A Cero)
-              </button>
+              <div className="relative group/tooltip w-full">
+                <button
+                  onClick={() => {
+                    setActiveMenuSpecialty(null);
+                    onResetSpecialty?.(activeMenuSpecialty);
+                  }}
+                  className="w-full flex flex-col gap-0.5 px-4 py-2.5 text-rose-400 hover:bg-rose-500/10 hover:text-rose-400 rounded-2xl text-left transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3 text-xs font-bold">
+                    <LucideIcons.RefreshCw className="w-4 h-4 text-rose-500" />
+                    Restablecer Especialidad (A Cero)
+                  </div>
+                  <span className="text-[10px] text-slate-400 pl-7 leading-normal normal-case mt-0.5 font-medium">
+                    ⚠️ Impacto: Regresa todos los temas de esta especialidad a 'Sin Empezar' y limpia historiales SRS.
+                  </span>
+                </button>
+              </div>
               
               <button
                 onClick={() => {
