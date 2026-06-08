@@ -552,7 +552,9 @@ export default function App() {
     const newLogItem: ReviewHistoryLog = {
       date: new Date().toISOString().split('T')[0],
       rating,
-      elapsedDays
+      elapsedDays,
+      ankiRetention: currentProgress.ankiRetention,
+      bankScore: currentProgress.bankScore
     };
     const finalLog = [...(currentProgress.reviewLog || []), newLogItem];
     const trend = calculatePerformanceTrend(finalLog);
@@ -574,6 +576,20 @@ export default function App() {
       finalStatus = 'Dominado';
     }
 
+    let finalNotes = currentProgress.notes || '';
+    if (currentProgress.clinicalPearl && currentProgress.clinicalPearl.trim()) {
+      const d = new Date();
+      const pad = (n: number) => n.toString().padStart(2, '0');
+      const fechaStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+      const pearlText = `* Perla de estudio/repaso (${fechaStr}): ${currentProgress.clinicalPearl.trim()}`;
+      
+      if (finalNotes.trim()) {
+        finalNotes = `${finalNotes.trim()}\n\n${pearlText}`;
+      } else {
+        finalNotes = pearlText;
+      }
+    }
+
     const updatedProgress: UserTopicProgress = {
       ...currentProgress,
       status: finalStatus,
@@ -582,7 +598,10 @@ export default function App() {
       repetitionsCount: repetitions,
       lastReviewedAt,
       nextReviewDate: finalNextReviewDate,
-      notes: currentProgress.notes || '',
+      notes: finalNotes,
+      ankiRetention: undefined,
+      bankScore: undefined,
+      clinicalPearl: undefined,
       reviewLog: finalLog,
       performanceTrend: trend,
       isGraduated: isGraduatedNow
@@ -1181,6 +1200,42 @@ export default function App() {
   const activeTopic = topics.find(t => t.id === selectedTopicId);
   const activeProgress = selectedTopicId ? topicsProgress[selectedTopicId] : null;
 
+  // Algoritmo Dinámico de Sugerencia SRS
+  const { suggestedDifficulty, globalScore } = React.useMemo(() => {
+    if (!activeProgress) return { suggestedDifficulty: null, globalScore: null };
+    const anki = activeProgress.ankiRetention;
+    const bank = activeProgress.bankScore;
+
+    const hasAnki = anki !== undefined && anki !== null && !isNaN(anki);
+    const hasBank = bank !== undefined && bank !== null && !isNaN(bank);
+
+    if (!hasAnki && !hasBank) return { suggestedDifficulty: null, globalScore: null };
+
+    let score = 0;
+    if (hasAnki && hasBank) {
+      score = (anki * 0.4) + (bank * 0.6);
+    } else if (hasAnki) {
+      score = anki;
+    } else {
+      score = bank;
+    }
+
+    const roundedScore = Math.round(score);
+
+    let difficulty: 'Otra vez' | 'Difícil' | 'Bien' | 'Fácil' = 'Bien';
+    if (roundedScore < 60) {
+      difficulty = 'Otra vez';
+    } else if (roundedScore < 75) {
+      difficulty = 'Difícil';
+    } else if (roundedScore < 90) {
+      difficulty = 'Bien';
+    } else {
+      difficulty = 'Fácil';
+    }
+
+    return { suggestedDifficulty: difficulty, globalScore: roundedScore };
+  }, [activeProgress?.ankiRetention, activeProgress?.bankScore]);
+
   // Count pending reviews for today or past due
   const todayStr = new Date().toISOString().split('T')[0];
   const pendingReviewsCount = topics.filter(t => {
@@ -1767,8 +1822,23 @@ export default function App() {
                                         'text-rose-400 bg-rose-500/10'
                                       }`}>{log.rating}</span>
                                     </div>
-                                    <div className="text-slate-400">
-                                      Transcurrido: <strong className="text-slate-200">{log.elapsedDays} días</strong>
+                                    <div className="flex items-center justify-between text-slate-400 pb-1">
+                                      <span>Transcurrido:</span>
+                                      <strong className="text-slate-200">{log.elapsedDays}d</strong>
+                                    </div>
+                                    <div className="flex items-center justify-between pt-1 border-t border-slate-800/60 text-[9px]">
+                                      <div className="flex items-center gap-1.5 text-slate-400" title="Retención Anki">
+                                        <Brain className="w-3 h-3 text-[#9d8afe]/90" />
+                                        <span className="font-mono text-slate-200 font-bold">
+                                          {log.ankiRetention !== undefined ? `${log.ankiRetention}%` : '--'}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5 text-slate-400" title="Aciertos en Simulacros">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-400/90" />
+                                        <span className="font-mono text-slate-200 font-bold">
+                                          {log.bankScore !== undefined ? `${log.bankScore}%` : '--'}
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                 );
@@ -1795,8 +1865,11 @@ export default function App() {
                                 type="number" 
                                 min="0" max="100" 
                                 placeholder="--"
-                                value={activeProgress?.ankiRetention || ''}
-                                onChange={(e) => handleUpdateTopicTracking(activeTopic.id, { ankiRetention: parseInt(e.target.value) || undefined })}
+                                value={(activeProgress?.ankiRetention !== undefined && activeProgress?.ankiRetention !== null) ? activeProgress.ankiRetention : ''}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  handleUpdateTopicTracking(activeTopic.id, { ankiRetention: isNaN(val) ? undefined : val });
+                                }}
                                 className="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-xs font-semibold text-white focus:outline-none transition-all"
                               />
                               <span className="absolute right-3 top-2 text-slate-500 text-xs font-extrabold">%</span>
@@ -1809,8 +1882,11 @@ export default function App() {
                                 type="number" 
                                 min="0" max="100" 
                                 placeholder="--"
-                                value={activeProgress?.bankScore || ''}
-                                onChange={(e) => handleUpdateTopicTracking(activeTopic.id, { bankScore: parseInt(e.target.value) || undefined })}
+                                value={(activeProgress?.bankScore !== undefined && activeProgress?.bankScore !== null) ? activeProgress.bankScore : ''}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  handleUpdateTopicTracking(activeTopic.id, { bankScore: isNaN(val) ? undefined : val });
+                                }}
                                 className="w-full pl-3 pr-8 py-2 bg-slate-955 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-xs font-semibold text-white focus:outline-none transition-all"
                               />
                               <span className="absolute right-3 top-2 text-slate-500 text-xs font-extrabold">%</span>
@@ -1831,16 +1907,38 @@ export default function App() {
 
                       {/* Sub-card: Perform dynamic session evaluation SRS */}
                       <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-2xl space-y-3">
-                        <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center justify-between mb-1">
                           <p className="text-xs font-bold text-slate-300">¿Cómo estuvo tu repaso hoy para calcular tu próximo intérvalo?</p>
                           <span className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">SRS Leitner</span>
                         </div>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+                        {suggestedDifficulty && (
+                          <div className="flex items-center gap-2 p-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-xl text-[10px] text-indigo-200 font-medium animate-pulse">
+                            <span className="flex h-2 w-2 relative">
+                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                            </span>
+                            <span>
+                              Recomendación IA: Repaso <strong className="text-white font-extrabold uppercase font-mono bg-indigo-500/20 px-1 rounded">{suggestedDifficulty}</strong> basado en tu desempeño combinado (<span className="text-indigo-400 font-bold">{globalScore}%</span>).
+                            </span>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
                           <button
                             id="btn-rate-otra-vez"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Otra vez')}
-                            className="p-3 bg-rose-500/10 hover:bg-rose-500/15 active:bg-rose-500/20 border border-rose-500/20 hover:border-rose-500/40 text-rose-700 dark:text-rose-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className={`relative p-3 bg-rose-500/10 hover:bg-rose-500/15 active:bg-rose-500/20 border ${
+                              suggestedDifficulty === 'Otra vez'
+                                ? 'border-rose-500 ring-2 ring-rose-500 ring-offset-2 ring-offset-slate-900 shadow-[0_0_15px_rgba(244,63,94,0.45)]'
+                                : 'border-rose-500/20 hover:border-rose-500/40'
+                            } text-rose-700 dark:text-rose-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center`}
                           >
+                            {suggestedDifficulty === 'Otra vez' && (
+                              <span className="absolute -top-1.5 bg-rose-500 text-slate-950 font-black text-[7px] uppercase tracking-widest px-1.5 py-0.5 rounded-full shadow font-mono">
+                                Recomendado
+                              </span>
+                            )}
                             <span className="text-normal">Otra vez</span>
                             <span className="text-[9px] text-rose-600/80 dark:text-rose-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Otra vez', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '1d')}
@@ -1849,8 +1947,17 @@ export default function App() {
                           <button
                             id="btn-rate-dificil"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Difícil')}
-                            className="p-3 bg-amber-500/10 hover:bg-amber-500/15 active:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-700 dark:text-amber-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className={`relative p-3 bg-amber-500/10 hover:bg-amber-500/15 active:bg-amber-500/20 border ${
+                              suggestedDifficulty === 'Difícil'
+                                ? 'border-amber-500 ring-2 ring-amber-500 ring-offset-2 ring-offset-slate-900 shadow-[0_0_15px_rgba(245,158,11,0.45)]'
+                                : 'border-amber-500/20 hover:border-amber-500/40'
+                            } text-amber-700 dark:text-amber-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center`}
                           >
+                            {suggestedDifficulty === 'Difícil' && (
+                              <span className="absolute -top-1.5 bg-amber-500 text-slate-950 font-black text-[7px] uppercase tracking-widest px-1.5 py-0.5 rounded-full shadow font-mono">
+                                Recomendado
+                              </span>
+                            )}
                             <span className="text-normal">Difícil</span>
                             <span className="text-[9px] text-amber-600/80 dark:text-amber-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Difícil', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×1.2')}
@@ -1859,8 +1966,17 @@ export default function App() {
                           <button
                             id="btn-rate-bien"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Bien')}
-                            className="p-3 bg-sky-500/10 hover:bg-sky-500/15 active:bg-sky-500/20 border border-sky-500/20 hover:border-sky-500/40 text-sky-700 dark:text-sky-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className={`relative p-3 bg-sky-500/10 hover:bg-sky-500/15 active:bg-sky-500/20 border ${
+                              suggestedDifficulty === 'Bien'
+                                ? 'border-sky-500 ring-2 ring-sky-500 ring-offset-2 ring-offset-slate-900 shadow-[0_0_15px_rgba(14,165,233,0.45)]'
+                                : 'border-sky-500/20 hover:border-sky-500/40'
+                            } text-sky-700 dark:text-sky-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center`}
                           >
+                            {suggestedDifficulty === 'Bien' && (
+                              <span className="absolute -top-1.5 bg-sky-500 text-slate-950 font-black text-[7px] uppercase tracking-widest px-1.5 py-0.5 rounded-full shadow font-mono">
+                                Recomendado
+                              </span>
+                            )}
                             <span className="text-normal">Bien</span>
                             <span className="text-[9px] text-sky-600/80 dark:text-sky-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Bien', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×2.0')}
@@ -1869,8 +1985,17 @@ export default function App() {
                           <button
                             id="btn-rate-facil"
                             onClick={() => handleRatingSubmit(activeTopic.id, 'Fácil')}
-                            className="p-3 bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center"
+                            className={`relative p-3 bg-emerald-500/10 hover:bg-emerald-500/15 active:bg-emerald-500/20 border ${
+                              suggestedDifficulty === 'Fácil'
+                                ? 'border-emerald-500 ring-2 ring-emerald-500 ring-offset-2 ring-offset-slate-900 shadow-[0_0_15px_rgba(16,185,129,0.45)]'
+                                : 'border-emerald-500/20 hover:border-emerald-500/40'
+                            } text-emerald-700 dark:text-emerald-400 rounded-xl text-xs font-extrabold transition-all transform active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-1 text-center`}
                           >
+                            {suggestedDifficulty === 'Fácil' && (
+                              <span className="absolute -top-1.5 bg-emerald-500 text-slate-950 font-black text-[7px] uppercase tracking-widest px-1.5 py-0.5 rounded-full shadow font-mono">
+                                Recomendado
+                              </span>
+                            )}
                             <span className="text-normal">Fácil</span>
                             <span className="text-[9px] text-emerald-600/80 dark:text-emerald-300/80 font-medium font-mono">
                               {getRealWaitTimeLabel('Fácil', activeProgress?.repetitionsCount || 0, activeProgress?.reviewInterval || 0, '×3.5')}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, GraduationCap, ChevronDown, ChevronRight, Award, Trash2, Calendar, BookOpen, Clock, AlertCircle, Sparkles } from 'lucide-react';
+import { Search, GraduationCap, ChevronDown, ChevronRight, Award, Trash2, Calendar, BookOpen, Clock, AlertCircle, Sparkles, Brain, CheckCircle2 } from 'lucide-react';
 import { Topic, UserTopicProgress } from '../types';
 import { SPECIALTIES } from '../data/topics';
 import * as LucideIcons from 'lucide-react';
@@ -218,17 +218,33 @@ export default function Boveda({ topics, topicsProgress, onSelectTopic, onRemove
                               {logs.slice(-4).map((log, lIdx) => (
                                 <div 
                                   key={lIdx} 
-                                  className="text-[9px] font-bold bg-slate-950 border border-slate-800 rounded px-2 py-1 flex items-center gap-1 shrink-0"
+                                  className="text-[9px] font-bold bg-slate-950 border border-slate-805 border-slate-800 rounded px-2.5 py-1.5 flex flex-col gap-1.5 shrink-0 select-none shadow-sm"
                                 >
-                                  <span className={
-                                    log.rating === 'Fácil' ? 'text-emerald-400' :
-                                    log.rating === 'Bien' ? 'text-sky-400' :
-                                    log.rating === 'Difícil' ? 'text-orange-400' : 'text-red-400'
-                                  }>
-                                    {log.rating === 'Fácil' ? '🟢' : log.rating === 'Bien' ? '🔵' : log.rating === 'Difícil' ? '🟠' : '🔴'}
-                                  </span>
-                                  <span className="text-slate-400">{log.date}</span>
-                                  <span className="text-slate-500 font-mono">({log.elapsedDays}d)</span>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className={
+                                      log.rating === 'Fácil' ? 'text-emerald-400' :
+                                      log.rating === 'Bien' ? 'text-sky-400' :
+                                      log.rating === 'Difícil' ? 'text-orange-400' : 'text-red-400'
+                                    }>
+                                      {log.rating === 'Fácil' ? '🟢' : log.rating === 'Bien' ? '🔵' : log.rating === 'Difícil' ? '🟠' : '🔴'}
+                                    </span>
+                                    <span className="text-slate-400">{log.date}</span>
+                                    <span className="text-slate-500 font-mono">({log.elapsedDays}d)</span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-3 pt-1 border-t border-slate-800/60">
+                                    <div className="flex items-center gap-1 text-slate-400" title="Retención Anki">
+                                      <Brain className="w-2.5 h-2.5 text-[#9d8afe]/90" />
+                                      <span className="font-mono text-slate-300 font-extrabold">
+                                        {log.ankiRetention !== undefined ? `${log.ankiRetention}%` : '--'}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1 text-slate-400" title="Aciertos en Simulacros">
+                                      <CheckCircle2 className="w-2.5 h-2.5 text-emerald-400/90" />
+                                      <span className="font-mono text-slate-300 font-extrabold">
+                                        {log.bankScore !== undefined ? `${log.bankScore}%` : '--'}
+                                      </span>
+                                    </div>
+                                  </div>
                                 </div>
                               ))}
                             </div>

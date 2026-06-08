@@ -11,6 +11,8 @@ export interface ReviewHistoryLog {
   date: string;
   rating: StudyRating;
   elapsedDays: number;
+  ankiRetention?: number;
+  bankScore?: number;
 }
 
 export interface UserTopicProgress {
