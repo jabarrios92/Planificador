@@ -379,94 +379,48 @@ export default function StudyCalendar({
 
   return (
     <div className="space-y-5">
-      {/* Tab Switcher - General Level */}
-      <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 bg-slate-900/40 p-2 rounded-2xl border border-slate-800">
-        <div className="flex gap-2">
+      {/* Compact Calendar Options Control Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900/60 p-3 rounded-2xl border border-slate-800 shadow-sm">
+        
+        {/* Sub-view selection buttons */}
+        <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800/80 gap-1 shrink-0">
           <button
-            onClick={() => setViewMode('monthly')}
-            className={`px-4 py-2 text-[10px] uppercase font-mono tracking-widest rounded-full transition-all flex items-center gap-2 cursor-pointer border ${
-              viewMode === 'monthly' ? 'bg-[#2a1b5c]/30 text-white border-[#9d8afe]' : 'bg-transparent border-transparent text-slate-400 hover:text-white'
+            onClick={() => setCalendarSubView('month')}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+              calendarSubView === 'month' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <LucideCalendar className="w-3.5 h-3.5" /> Calendario
+            Mes
           </button>
           <button
-            onClick={() => setViewMode('tracker')}
-            className={`px-4 py-2 text-[10px] uppercase font-mono tracking-widest rounded-full transition-all flex items-center gap-2 cursor-pointer border ${
-              viewMode === 'tracker' ? 'bg-[#2a1b5c]/30 text-white border-[#9d8afe]' : 'bg-transparent border-transparent text-slate-400 hover:text-white'
+            onClick={() => setCalendarSubView('week')}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+              calendarSubView === 'week' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <ListTodo className="w-3.5 h-3.5" /> Tracker
+            Semana
+          </button>
+          <button
+            onClick={() => setCalendarSubView('day')}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+              calendarSubView === 'day' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Día
+          </button>
+          <button
+            onClick={() => setCalendarSubView('agenda')}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
+              calendarSubView === 'agenda' ? 'bg-slate-800 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            Agenda
           </button>
         </div>
 
-        {/* Calendar Style Toggle (Google Calendar style: Month, Week, Agenda) */}
-        {viewMode === 'monthly' && (
-          <div className="flex gap-2">
-            <div className="relative">
-              <button
-                onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
-                className="px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer bg-slate-950 border border-slate-800 text-slate-400 hover:text-white flex items-center gap-1.5 h-full"
-              >
-                <Download className="w-3.5 h-3.5" /> Exportar
-              </button>
-              
-              {isExportMenuOpen && (
-                <div className="absolute left-0 mt-2 w-48 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl z-50 overflow-hidden py-1">
-                  <button onClick={handleExportICS} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors">
-                    <CalendarDays className="w-4 h-4 text-indigo-400" /> Sincronizar Calendario (.ics)
-                  </button>
-                  <button onClick={handleExportImage} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors border-t border-slate-800/60">
-                    <ImageIcon className="w-4 h-4 text-emerald-400" /> Exportar Imagen (.png)
-                  </button>
-                  <button onClick={handleExportPDF} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors border-t border-slate-800/60">
-                    <FileText className="w-4 h-4 text-rose-400" /> Exportar a PDF (.pdf)
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="flex bg-slate-950 p-1 rounded-xl border border-slate-800 gap-1">
-              <button
-                onClick={() => setCalendarSubView('month')}
-                className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                  calendarSubView === 'month' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-                }`}
-              >
-              Mes
-            </button>
-            <button
-              onClick={() => setCalendarSubView('week')}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                calendarSubView === 'week' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Semana
-            </button>
-            <button
-              onClick={() => setCalendarSubView('day')}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                calendarSubView === 'day' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Día
-            </button>
-            <button
-              onClick={() => setCalendarSubView('agenda')}
-              className={`px-3 py-1.5 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
-                calendarSubView === 'agenda' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Agenda
-            </button>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Specialty Filter Dropdown */}
-      {viewMode === 'monthly' && (
-        <div className="flex gap-2 relative">
+        {/* Action controls (Filtros & Exportar) */}
+        <div className="flex items-center gap-2">
+          {/* Specialty Filter button & dropdown */}
           <div className="relative" id="specialty-filter-container">
             <button 
               onClick={() => {
@@ -478,16 +432,16 @@ export default function StudyCalendar({
                   el.classList.toggle('hidden');
                 }
               }}
-              className={`px-4 py-2 text-xs font-bold rounded-xl transition-all border shrink-0 cursor-pointer flex items-center gap-2 bg-slate-900 border-slate-800 hover:bg-slate-800 ${specialtyFilters.length > 0 ? 'text-indigo-400 border-indigo-500/50' : 'text-slate-300'}`}
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all border shrink-0 cursor-pointer flex items-center gap-1.5 bg-slate-950 border-slate-800 hover:bg-slate-850 ${specialtyFilters.length > 0 ? 'text-indigo-400 border-indigo-500/50 shadow-[0_0_8px_rgba(99,102,241,0.2)]' : 'text-slate-400 hover:text-white'}`}
             >
               Filtro Especialidad {specialtyFilters.length > 0 && `(${specialtyFilters.length})`}
               <ChevronDown className="w-3.5 h-3.5" />
             </button>
-            <div id="specialty-filter-dropdown" className="hidden absolute left-0 mt-2 w-72 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl z-50 p-3 overflow-hidden flex flex-col gap-2">
+            <div id="specialty-filter-dropdown" className="hidden absolute right-0 mt-2 w-72 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl z-50 p-3 overflow-hidden flex flex-col gap-2">
               <div className="max-h-64 overflow-y-auto flex flex-col gap-1 pr-1 custom-scrollbar">
                 <button 
                   onClick={() => setTempSpecialtyFilters([])}
-                  className={`px-3 py-2 text-[10px] text-left uppercase font-bold rounded-lg transition-all border cursor-pointer ${tempSpecialtyFilters.length === 0 ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/50 hover:text-white'}`}
+                  className={`w-full px-2 py-1.5 text-[10px] text-left uppercase font-bold rounded-lg transition-all border cursor-pointer ${tempSpecialtyFilters.length === 0 ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/50 hover:text-white'}`}
                 >
                   Todas
                 </button>
@@ -501,12 +455,12 @@ export default function StudyCalendar({
                           prev.includes(spec) ? prev.filter(s => s !== spec) : [...prev, spec]
                         );
                       }}
-                      className={`px-3 py-2 text-[10px] text-left uppercase font-bold rounded-lg transition-all border flex gap-2 items-center cursor-pointer ${isSelected ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/50 hover:text-white'}`}
+                      className={`w-full px-2 py-1.5 text-[10px] text-left uppercase font-bold rounded-lg transition-all border flex gap-2 items-center cursor-pointer ${isSelected ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30 font-bold' : 'bg-transparent text-slate-400 border-transparent hover:bg-slate-800/50 hover:text-white'}`}
                     >
-                      <div className={`w-3.5 h-3.5 rounded flex items-center justify-center border ${isSelected ? 'bg-indigo-500 border-indigo-500' : 'border-slate-600'}`}>
-                        {isSelected && <CheckCircle2 className="w-2.5 h-2.5 text-white" />}
+                      <div className={`w-3 h-3 rounded flex items-center justify-center border shrink-0 ${isSelected ? 'bg-indigo-50 border-indigo-500' : 'border-slate-600'}`}>
+                        {isSelected && <CheckCircle2 className="w-2 h-2 text-white" />}
                       </div>
-                      {spec}
+                      <span className="truncate">{spec}</span>
                     </button>
                   );
                 })}
@@ -517,68 +471,42 @@ export default function StudyCalendar({
                     setSpecialtyFilters(tempSpecialtyFilters);
                     document.getElementById('specialty-filter-dropdown')?.classList.add('hidden');
                   }}
-                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] rounded-lg transition-colors"
+                  className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-[10px] rounded-lg transition-all"
                 >
                   Aplicar Filtro
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Guide Card (Collapsible) - Explains "Cómo se usa el calendario?" */}
-      <div className="p-5 bg-indigo-500/5 border border-indigo-500/15 rounded-2xl space-y-4">
-        <div className="flex justify-between items-center cursor-pointer select-none" onClick={() => setShowHowToUse(!showHowToUse)}>
-          <div className="flex items-center gap-2.5 text-indigo-400">
-            <HelpCircle className="w-5 h-5" />
-            <h4 className="font-bold text-sm text-white">¿Cómo se usa el calendario y el flujo de fechas?</h4>
+          {/* Export Menu button & dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setIsExportMenuOpen(!isExportMenuOpen)}
+              className="px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all cursor-pointer bg-slate-950 border border-slate-800 text-slate-400 hover:text-white flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" /> Exportar
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+            
+            {isExportMenuOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-slate-900 border border-slate-700/60 rounded-xl shadow-2xl z-50 overflow-hidden py-1">
+                <button onClick={handleExportICS} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors">
+                  <CalendarDays className="w-4 h-4 text-indigo-400" /> Sincronizar Calendario (.ics)
+                </button>
+                <button onClick={handleExportImage} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors border-t border-slate-800/60">
+                  <ImageIcon className="w-4 h-4 text-emerald-400" /> Exportar Imagen (.png)
+                </button>
+                <button onClick={handleExportPDF} className="w-full px-4 py-2.5 text-xs text-left text-slate-300 hover:bg-slate-800 hover:text-white flex items-center gap-2 transition-colors border-t border-slate-800/60">
+                  <FileText className="w-4 h-4 text-rose-400" /> Exportar a PDF (.pdf)
+                </button>
+              </div>
+            )}
           </div>
-          <button className="text-slate-400 hover:text-white transition-colors cursor-pointer">
-            {showHowToUse ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
         </div>
-
-        {showHowToUse && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 text-xs border-t border-indigo-500/15 leading-relaxed text-slate-300">
-            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
-              <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-1">1. Fecha Día 1</span>
-              <p>Ponle fecha de inicio a tu plan (ej. 8 de Junio). El sistema calculará automáticamente las fechas de estudio para todos los temas subsecuentes de la lista secuencialmente.</p>
-            </div>
-            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
-              <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-1">2. Fin de Semana Libres</span>
-              <p>El planificador esquiva sábados y domingos automáticamente durante la asignación secuencial para garantizarte tiempo de descanso e hidratación académica.</p>
-            </div>
-            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
-              <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-widest block mb-1">3. Posponer Temas</span>
-              <p>¿No pudiste estudiar hoy? Abre el <strong>Tracker Detallado</strong> y cámbiale la fecha a ese tema. Los temas siguientes se reajustarán automáticamente empujando el calendario.</p>
-            </div>
-            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
-              <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">4. Estudio vs SRS</span>
-              <p>El calendario muestra: 📘 <strong>Tema del Día</strong> (Tracker) y ⏰ <strong>Repasos del Día</strong> (SRS calculados según tu desempeño). Sigue el calendario para dominar el exámen.</p>
-            </div>
-          </div>
-        )}
       </div>
 
-      {viewMode === 'tracker' ? (
-        <WeeklyTracker 
-          topics={topics} 
-          onTopicsChange={onTopicsChange}
-          studyConfig={studyConfig}
-          onStudyConfigChange={onStudyConfigChange}
-          topicsProgress={topicsProgress} 
-          onUpdateTopicTracking={onUpdateTopicTracking} 
-          onCompleteReview={onCompleteReview}
-          specialtyOrder={specialtyOrder}
-          onSpecialtyOrderChange={onSpecialtyOrderChange}
-          planStartDate={planStartDate}
-          onPlanStartDateChange={onPlanStartDateChange}
-          searchQuery={searchQuery}
-          onSearchQueryChange={onSearchQueryChange}
-        />
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 select-none">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 select-none">
           
           {/* Main Calendar View Area - Left 8 columns */}
           <div id="exportable-calendar" className="lg:col-span-8 p-5 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col justify-between space-y-4">
@@ -1212,7 +1140,6 @@ export default function StudyCalendar({
             </div>
           </div>
         </div>
-      )}
 
       {/* Floating Modal for Tasks/Notes when long-press / double-click triggered */}
       {isTasksModalOpen && selectedDateStr && (
@@ -1324,6 +1251,40 @@ export default function StudyCalendar({
           </div>
         </div>
       )}
+
+      {/* Guide Card (Collapsible) - Explains "Cómo se usa el calendario?" */}
+      <div className="p-5 bg-indigo-500/5 border border-indigo-500/15 rounded-2xl space-y-4 mt-6">
+        <div className="flex justify-between items-center cursor-pointer select-none" onClick={() => setShowHowToUse(!showHowToUse)}>
+          <div className="flex items-center gap-2.5 text-indigo-400">
+            <HelpCircle className="w-5 h-5" />
+            <h4 className="font-bold text-sm text-white">¿Cómo se usa el calendario y el flujo de fechas?</h4>
+          </div>
+          <button className="text-slate-400 hover:text-white transition-colors cursor-pointer">
+            {showHowToUse ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {showHowToUse && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 pt-2 text-xs border-t border-indigo-500/15 leading-relaxed text-slate-300">
+            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+              <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-1">1. Fecha Día 1</span>
+              <p>Ponle fecha de inicio a tu plan (ej. 8 de Junio). El sistema calculará automáticamente las fechas de estudio para todos los temas subsecuentes de la lista secuencialmente.</p>
+            </div>
+            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+              <span className="text-[10px] font-extrabold text-indigo-400 uppercase tracking-widest block mb-1">2. Fin de Semana Libres</span>
+              <p>El planificador esquiva sábados y domingos automáticamente durante la asignación secuencial para garantizarte tiempo de descanso e hidratación académica.</p>
+            </div>
+            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+              <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-widest block mb-1">3. Posponer Temas</span>
+              <p>¿No pudiste estudiar hoy? Abre el <strong>Tracker Detallado</strong> y cámbiale la fecha a ese tema. Los temas siguientes se reajustarán automáticamente empujando el calendario.</p>
+            </div>
+            <div className="space-y-1.5 bg-slate-900/40 p-3 rounded-xl border border-slate-800/40">
+              <span className="text-[10px] font-extrabold text-emerald-400 uppercase tracking-widest block mb-1">4. Estudio vs SRS</span>
+              <p>El calendario muestra: 📘 <strong>Tema del Día</strong> (Tracker) y ⏰ <strong>Repasos del Día</strong> (SRS calculados según tu desempeño). Sigue el calendario para dominar el examen.</p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

@@ -128,7 +128,20 @@ export default function Home({
               <div className="space-y-8 mt-0 lg:mt-8 flex-1 flex flex-col justify-center w-full items-center">
                 <motion.div 
                   variants={fadeUp} 
-                  className="group cursor-pointer flex flex-col items-center p-6 bg-slate-900/40 border border-slate-800 rounded-2xl w-full max-w-sm shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg backdrop-blur-sm" 
+                  whileHover={{ 
+                    backgroundColor: "rgba(15, 23, 42, 0.4)", 
+                    borderColor: "rgba(30, 41, 59, 0.8)",
+                    backdropFilter: "blur(8px)",
+                    scale: 1.02
+                  }}
+                  whileInView={{
+                    backgroundColor: ["rgba(15, 23, 42, 0)", "rgba(15, 23, 42, 0.4)"],
+                    borderColor: ["rgba(30, 41, 59, 0)", "rgba(30, 41, 59, 0.8)"],
+                    backdropFilter: ["blur(0px)", "blur(8px)"]
+                  }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="group cursor-pointer flex flex-col items-center p-6 border border-transparent rounded-2xl w-full max-w-sm shadow-sm transition-all" 
                   onClick={() => onNavigate('syllabus')}
                 >
                   <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#766a87] mb-4 flex items-center gap-2">
@@ -144,7 +157,20 @@ export default function Home({
 
                 <motion.div 
                   variants={fadeUp} 
-                  className="flex flex-col items-center p-6 bg-slate-900/40 border border-slate-800 rounded-2xl w-full max-w-sm shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg backdrop-blur-sm"
+                  whileHover={{ 
+                    backgroundColor: "rgba(15, 23, 42, 0.4)", 
+                    borderColor: "rgba(30, 41, 59, 0.8)",
+                    backdropFilter: "blur(8px)",
+                    scale: 1.02
+                  }}
+                  whileInView={{
+                    backgroundColor: ["rgba(15, 23, 42, 0)", "rgba(15, 23, 42, 0.4)"],
+                    borderColor: ["rgba(30, 41, 59, 0)", "rgba(30, 41, 59, 0.8)"],
+                    backdropFilter: ["blur(0px)", "blur(8px)"]
+                  }}
+                  viewport={{ once: false, amount: 0.5 }}
+                  transition={{ duration: 0.4, ease: "easeOut" }}
+                  className="flex flex-col items-center p-6 border border-transparent rounded-2xl w-full max-w-sm shadow-sm transition-all"
                 >
                   <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#766a87] mb-3 flex items-center gap-2">
                     <span className="w-4 h-[1px] bg-[#766a87]"></span> DESEMPEÑO <span className="w-4 h-[1px] bg-[#766a87]"></span>

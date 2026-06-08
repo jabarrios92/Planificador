@@ -32,6 +32,7 @@ import StudyStats from './components/StudyStats';
 import StudyCalendar from './components/StudyCalendar';
 import Boveda from './components/Boveda';
 import Home from './components/Home';
+import { WeeklyTracker } from './components/WeeklyTracker';
 
 export default function App() {
   const [studyConfig, setStudyConfig] = useState<StudyConfig>(() => {
@@ -46,7 +47,7 @@ export default function App() {
     setStudyConfig(newConfig);
     localStorage.setItem('studyConfig', JSON.stringify(newConfig));
   };
-  const [currentTab, setCurrentTab] = useState<'home' | 'syllabus' | 'calendar' | 'profile' | 'boveda'>('home');
+  const [currentTab, setCurrentTab] = useState<'home' | 'syllabus' | 'tracker' | 'calendar' | 'profile' | 'boveda'>('home');
 
   // Tab scroll preservation logic
   const scrollPositionsRef = React.useRef<Record<string, number>>({});
@@ -1256,6 +1257,16 @@ export default function App() {
                 Temas ({topics.length})
               </button>
               <button
+                onClick={() => setCurrentTab('tracker')}
+                className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 ${
+                  currentTab === 'tracker'
+                    ? 'text-white border-white'
+                    : 'text-slate-400 border-transparent hover:text-white'
+                }`}
+              >
+                Tracker
+              </button>
+              <button
                 onClick={() => setCurrentTab('calendar')}
                 className={`text-[10px] font-mono tracking-widest uppercase transition-all cursor-pointer border-b-2 pb-1 ${
                   currentTab === 'calendar'
@@ -1389,51 +1400,60 @@ export default function App() {
 
         {/* Mobile bottom nav utilities bar */}
         {!isSessionMode && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 py-2 border-t border-slate-800 bg-slate-900/95 backdrop-blur z-40 flex justify-around">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 py-2 border-t border-slate-800 bg-slate-900/95 backdrop-blur z-40 flex justify-around select-none">
           <button
             onClick={() => setCurrentTab('home')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
               currentTab === 'home' ? 'text-[#9d8afe]' : 'text-slate-400'
             }`}
           >
-            <Sparkles className="w-4.5 h-4.5" />
+            <Sparkles className="w-4 h-4" />
             <span>Inicio</span>
           </button>
           <button
             onClick={() => setCurrentTab('syllabus')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
               currentTab === 'syllabus' ? 'text-[#9d8afe]' : 'text-slate-400'
             }`}
           >
-            <BookOpen className="w-4.5 h-4.5" />
+            <BookOpen className="w-4 h-4" />
             <span>Temas</span>
           </button>
           <button
-            onClick={() => setCurrentTab('calendar')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
-              currentTab === 'calendar' ? 'text-sky-500' : 'text-slate-400'
+            onClick={() => setCurrentTab('tracker')}
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
+              currentTab === 'tracker' ? 'text-[#9d8afe]' : 'text-slate-400'
             }`}
           >
-            <Calendar className="w-4.5 h-4.5" />
-            <span>Calendario</span>
+            <Activity className="w-4 h-4 text-rose-450" />
+            <span>Tracker</span>
+          </button>
+          <button
+            onClick={() => setCurrentTab('calendar')}
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
+              currentTab === 'calendar' ? 'text-[#9d8afe]' : 'text-slate-400'
+            }`}
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Calen.</span>
           </button>
           <button
             onClick={() => setCurrentTab('boveda')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
               currentTab === 'boveda' ? 'text-[#9d8afe] font-bold' : 'text-slate-400'
             }`}
           >
-            <GraduationCap className="w-4.5 h-4.5" />
+            <GraduationCap className="w-4 h-4" />
             <span>Bóveda</span>
           </button>
           <button
             onClick={() => setCurrentTab('profile')}
-            className={`flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-semibold cursor-pointer ${
-              currentTab === 'profile' ? 'text-sky-500' : 'text-slate-400'
+            className={`flex flex-col items-center justify-center p-1 rounded-md text-[9px] font-semibold cursor-pointer ${
+              currentTab === 'profile' ? 'text-[#9d8afe]' : 'text-slate-400'
             }`}
           >
-            <User className="w-4.5 h-4.5" />
-            <span>Nube</span>
+            <User className="w-4 h-4" />
+            <span>Perfil</span>
           </button>
         </div>
         )}
@@ -1761,6 +1781,54 @@ export default function App() {
                     {/* Active study content interaction tabs */}
                     <div className="p-6 space-y-6">
                       
+                      {/* Metric evaluation inputs synchronizing with global progress tracking */}
+                      <div className="p-4 bg-slate-800/30 border border-slate-800 rounded-2xl space-y-3.5">
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-slate-300">Rendimiento Técnico de Estudio</p>
+                          <span className="text-[9px] font-mono font-bold text-[#9d8afe] uppercase tracking-widest">Sincronización</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Asimilación Anki (%)</label>
+                            <div className="relative">
+                              <input 
+                                type="number" 
+                                min="0" max="100" 
+                                placeholder="--"
+                                value={activeProgress?.ankiRetention || ''}
+                                onChange={(e) => handleUpdateTopicTracking(activeTopic.id, { ankiRetention: parseInt(e.target.value) || undefined })}
+                                className="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-xs font-semibold text-white focus:outline-none transition-all"
+                              />
+                              <span className="absolute right-3 top-2 text-slate-500 text-xs font-extrabold">%</span>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Aciertos en Simulacros (%)</label>
+                            <div className="relative">
+                              <input 
+                                type="number" 
+                                min="0" max="100" 
+                                placeholder="--"
+                                value={activeProgress?.bankScore || ''}
+                                onChange={(e) => handleUpdateTopicTracking(activeTopic.id, { bankScore: parseInt(e.target.value) || undefined })}
+                                className="w-full pl-3 pr-8 py-2 bg-slate-955 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-xs font-semibold text-white focus:outline-none transition-all"
+                              />
+                              <span className="absolute right-3 top-2 text-slate-500 text-xs font-extrabold">%</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 font-mono">Perla Clínica a Rescatar</label>
+                          <input 
+                            type="text" 
+                            placeholder="Anota la perla clínica rescatada..."
+                            value={activeProgress?.clinicalPearl || ''}
+                            onChange={(e) => handleUpdateTopicTracking(activeTopic.id, { clinicalPearl: e.target.value })}
+                            className="w-full px-3 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 focus:border-indigo-500 rounded-xl text-xs font-medium text-slate-200 focus:outline-none transition-all"
+                          />
+                        </div>
+                      </div>
+
                       {/* Sub-card: Perform dynamic session evaluation SRS */}
                       <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-2xl space-y-3">
                         <div className="flex items-center justify-between mb-2">
@@ -1835,6 +1903,29 @@ export default function App() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+
+          {/* Tab Tracker: Independent of calendar */}
+          <div className={currentTab === 'tracker' ? '' : 'hidden'}>
+            <div className="space-y-4">
+              <div className="px-2">
+                <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Tracker de Desempeño Semanal</h2>
+                <p className="text-sm text-slate-300">Monitorea tus metas de rendimiento, aciertos de simulacro y retención clínica.</p>
+              </div>
+              <WeeklyTracker 
+                topics={topics}
+                onTopicsChange={handleTopicsChange}
+                studyConfig={studyConfig}
+                onStudyConfigChange={handleStudyConfigChange}
+                topicsProgress={topicsProgress}
+                onUpdateTopicTracking={handleUpdateTopicTracking}
+                onCompleteReview={(topicId, rating) => handleRatingSubmit(topicId, rating)}
+                specialtyOrder={specialtyOrder}
+                onSpecialtyOrderChange={handleSpecialtyOrderChange}
+                planStartDate={planStartDate}
+                onPlanStartDateChange={handlePlanStartDateChange}
+              />
             </div>
           </div>
 
