@@ -115,7 +115,7 @@ export default function Boveda({ topics, topicsProgress, onSelectTopic, onRemove
           const GroupIcon = (LucideIcons as any)[spec.icon] || BookOpen;
 
           return (
-            <div key={spec.name} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden transition-all shadow-md">
+            <div key={spec.name} className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-md transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
               {/* Header */}
               <div
                 onClick={() => !hasSearch && toggleSpecialty(spec.name)}
@@ -156,7 +156,7 @@ export default function Boveda({ topics, topicsProgress, onSelectTopic, onRemove
                     return (
                       <div 
                         key={topic.id}
-                        className="bg-slate-900 border border-slate-800/80 hover:border-indigo-500/25 p-4 rounded-xl space-y-4 transition-all relative group flex flex-col justify-between shadow-sm"
+                        className="bg-slate-900 border border-slate-800/80 hover:border-indigo-500/25 p-4 rounded-xl space-y-4 relative group flex flex-col justify-between shadow-sm transition-all duration-200 hover:scale-[1.02] hover:shadow-lg"
                       >
                         {/* Title and Top Attributes */}
                         <div className="space-y-1.5">

@@ -468,7 +468,7 @@ export default function Syllabus({
         {recommendedTopic && (
           <div 
             onClick={() => onSelectTopic(recommendedTopic.id)}
-            className={`p-5 bg-gradient-to-br from-[#807BD2]/15 via-slate-550/0 to-[#807BD2]/22 dark:from-[#807BD2]/22 dark:via-transparent dark:to-[#807BD2]/30 border border-[#807BD2]/25 dark:border-[#807BD2]/20 rounded-2xl cursor-pointer hover:border-[#807BD2]/45 dark:hover:border-[#807BD2]/40 hover:shadow-lg hover:shadow-[#807BD2]/5 transition-all duration-300 space-y-2.5 shadow-md relative overflow-hidden group ${
+            className={`p-5 bg-gradient-to-br from-[#807BD2]/15 via-slate-550/0 to-[#807BD2]/22 dark:from-[#807BD2]/22 dark:via-transparent dark:to-[#807BD2]/30 border border-[#807BD2]/25 dark:border-[#807BD2]/20 rounded-2xl cursor-pointer hover:border-[#807BD2]/45 dark:hover:border-[#807BD2]/40 shadow-md relative overflow-hidden group transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${
               selectedTopicId === recommendedTopic.id ? 'ring-1 ring-[#807BD2]/50 bg-slate-50/20 dark:bg-slate-900/10' : ''
             }`}
           >
@@ -544,7 +544,7 @@ export default function Syllabus({
                           <div
                             ref={providedDrag.innerRef}
                             {...providedDrag.draggableProps}
-                            className={`bg-transparent border border-slate-800 rounded-2xl overflow-hidden transition-all duration-300 shadow-sm ${
+                            className={`bg-transparent border border-slate-800 rounded-2xl overflow-hidden transition-all duration-200 hover:scale-[1.02] hover:shadow-lg shadow-sm ${
                               snapshotDrag.isDragging ? 'ring-1 ring-[#a5a1f6] bg-slate-900 border-[#a5a1f6]/30 scale-[1.012] shadow-xl z-50' : ''
                             }`}
                           >

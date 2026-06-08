@@ -192,7 +192,7 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
       {/* Visual top widgets cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Total stats */}
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3">
+        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
           <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center shrink-0">
             <BookOpen className="w-5 h-5" />
           </div>
@@ -203,7 +203,7 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
         </div>
 
         {/* Mastered */}
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3">
+        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
           <div className="w-10 h-10 bg-emerald-500/10 text-emerald-400 rounded-xl flex items-center justify-center shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
@@ -214,7 +214,7 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
         </div>
 
         {/* In Review */}
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3">
+        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
           <div className="w-10 h-10 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center shrink-0">
             <RefreshCw className="w-5 h-5 animate-spin-slow" />
           </div>
@@ -225,7 +225,7 @@ export default function StudyStats({ topicsProgress }: StudyStatsProps) {
         </div>
 
         {/* Global rate */}
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3">
+        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl flex items-center gap-3 transition-all duration-200 hover:scale-[1.02] hover:shadow-lg">
           <div className="w-10 h-10 bg-indigo-500/10 text-indigo-400 rounded-xl flex items-center justify-center shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>

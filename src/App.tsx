@@ -81,6 +81,7 @@ export default function App() {
   const [logHoldTimer, setLogHoldTimer] = useState<any>(null);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [isSessionMode, setIsSessionMode] = useState(false);
+  const [isNotificationsDropdownOpen, setIsNotificationsDropdownOpen] = useState(false);
 
   const [dailySummaryModal, setDailySummaryModal] = useState(false);
   const [notificationConfig, setNotificationConfig] = useState({
@@ -1288,19 +1289,90 @@ export default function App() {
 
             {/* Quick action tools */}
             <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                {/* Push notifications trigger */}
+              <div className="flex items-center gap-3 relative">
+                {/* Custom Notifications Droppable Icon Toggle */}
                 <button
-                  onClick={toggleNotifications}
-                  title="Configurar Notificaciones"
-                  className={`w-8 h-8 rounded-full border transition-all cursor-pointer flex items-center justify-center p-0 ${
-                    notificationEnabled 
+                  onClick={() => setIsNotificationsDropdownOpen(!isNotificationsDropdownOpen)}
+                  title="Notificaciones"
+                  className={`w-8 h-8 rounded-full border transition-all cursor-pointer flex items-center justify-center p-0 relative ${
+                    isNotificationsDropdownOpen || pendingReviewsCount > 0
                       ? 'border-[#9d8afe] text-[#9d8afe] bg-[#2a1b5c]/30' 
                       : 'border-slate-800 text-[#766a87] bg-transparent hover:border-white hover:text-white'
                   }`}
                 >
-                  {notificationEnabled ? <Bell className="w-3.5 h-3.5" /> : <BellOff className="w-3.5 h-3.5" />}
+                  <Bell className="w-3.5 h-3.5" />
+                  {pendingReviewsCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                    </span>
+                  )}
                 </button>
+
+                {/* Notifications Dropdown Panel */}
+                {isNotificationsDropdownOpen && (
+                  <div className="absolute right-0 top-10 w-80 bg-slate-900/98 backdrop-blur-md rounded-2xl border border-slate-800 p-4 shadow-2xl z-50 text-slate-200 animate-in fade-in slide-in-from-top-2 duration-200 space-y-3.5">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="font-bold text-xs uppercase tracking-widest text-[#e2dbea]">Notificaciones</span>
+                      {pendingReviewsCount > 0 && (
+                        <span className="text-[10px] font-mono bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded text-amber-500 font-semibold animate-pulse">
+                          {pendingReviewsCount} pendientes
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      {pendingReviewsCount > 0 ? (
+                        <div className="space-y-2">
+                          <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl space-y-1.5">
+                            <div className="flex items-center gap-2 text-amber-500 font-bold text-[11px]">
+                              <Clock className="w-3.5 h-3.5 shrink-0 animate-pulse" />
+                              <span>Repasos Programados</span>
+                            </div>
+                            <p className="text-[10px] text-slate-400 leading-normal">
+                              El algoritmo de repetición espaciada SRS tiene <strong>{pendingReviewsCount} temas</strong> listos para consolidar tu aprendizaje hoy.
+                            </p>
+                            <button
+                              onClick={() => {
+                                setCurrentTab('calendar');
+                                setIsNotificationsDropdownOpen(false);
+                              }}
+                              className="w-full py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-[10px] uppercase tracking-wider transition-all cursor-pointer text-center"
+                            >
+                              Ir a Calendario
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 space-y-1.5">
+                          <div className="text-xl">✨</div>
+                          <p className="text-[10px] font-bold text-slate-300">¡Todo al día!</p>
+                          <p className="text-[9px] text-slate-500 max-w-[200px] mx-auto leading-normal">
+                            No tienes repasos agendados pendientes para hoy. El algoritmo SRS se actualizará con tus avances.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t border-slate-850 pt-2.5 flex flex-col gap-2">
+                      <div className="flex items-center justify-between text-[9px] text-slate-400 font-mono">
+                        <span>Notificaciones de escritorio:</span>
+                        <span className={notificationEnabled ? "text-emerald-400 font-bold" : "text-slate-500"}>
+                          {notificationEnabled ? 'ACTIVADAS' : 'DESACTIVADAS'}
+                        </span>
+                      </div>
+                      
+                      {!notificationEnabled && (
+                        <button
+                          onClick={toggleNotifications}
+                          className="w-full text-center py-1 bg-slate-800 hover:bg-slate-750 hover:text-white rounded-lg text-[9px] font-bold transition-all uppercase tracking-wider"
+                        >
+                          Habilitar push de escritorio 🚀
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Status indicator backup */}
@@ -1378,31 +1450,6 @@ export default function App() {
               </div>
               <button onClick={() => setToastMessage(null)} className="text-[10px] text-sky-400 hover:underline">
                 Cerrar
-              </button>
-            </div>
-          )}
-
-          {/* Pending reviews banner alert */}
-          {pendingReviewsCount > 0 && (
-            <div className="p-4 bg-amber-500/10 border border-amber-500/20 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500 animate-pulse">
-                  <Clock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-bold text-white">
-                    ¡Tienes repasos médicos agendados para hoy!
-                  </h3>
-                  <p className="text-xs text-slate-400">
-                    El algoritmo de repetición espaciada SRS ha programado <b>{pendingReviewsCount} temas</b> científicos listos para consolidar tu aprendizaje hoy.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setCurrentTab('calendar')}
-                className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shrink-0"
-              >
-                Ir a Calendario <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           )}
